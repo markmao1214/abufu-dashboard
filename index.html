@@ -6,783 +6,721 @@
     <title>阿福交易儀表板</title>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --color-bg: #F5F5F5;
-            --color-surface: #FFFFFF;
-            --color-primary: #1A3A52;
-            --color-primary-light: #2A5A72;
-            --color-accent-short: #8B1A1A;
-            --color-accent-long: #1A6B2A;
-            --color-accent-alert: #D97706;
-            --color-text: #2D3748;
-            --color-text-light: #718096;
-            --color-border: #E2E8F0;
-            --spacing-xs: 8px;
-            --spacing-sm: 16px;
-            --spacing-md: 24px;
-            --spacing-lg: 32px;
-            --spacing-xl: 48px;
+            --bg: #F0F2F5;
+            --surface: #FFFFFF;
+            --primary: #1A3A52;
+            --primary-light: #2A5A72;
+            --short: #C0392B;
+            --long: #1A6B2A;
+            --alert: #D97706;
+            --text: #1A202C;
+            --text-light: #718096;
+            --border: #E2E8F0;
+            --risk-low: #27AE60;
+            --risk-mid: #F39C12;
+            --risk-high: #E74C3C;
+            --radius: 10px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--color-bg);
-            color: var(--color-text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", sans-serif;
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: var(--spacing-sm);
-        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 12px; }
 
-        /* ─── Header ─────────────────────────────────────────────── */
+        /* ── Header ── */
         .header {
-            background: var(--color-surface);
-            padding: var(--spacing-lg);
-            border-radius: 8px;
-            margin-bottom: var(--spacing-md);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .header h1 {
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--color-primary);
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .header p {
-            color: var(--color-text-light);
-            font-size: 14px;
-        }
-
-        /* ─── Tabs ───────────────────────────────────────────────── */
-        .tabs {
-            display: flex;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-md);
-            background: var(--color-surface);
-            padding: var(--spacing-sm);
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .tab-button {
-            padding: var(--spacing-sm) var(--spacing-md);
-            border: none;
-            background: transparent;
-            color: var(--color-text-light);
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .tab-button.active {
-            color: var(--color-primary);
-            border-bottom-color: var(--color-primary);
-        }
-
-        .tab-button:hover {
-            color: var(--color-primary);
-        }
-
-        /* ─── Content ────────────────────────────────────────────── */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* ─── Card ───────────────────────────────────────────────── */
-        .card {
-            background: var(--color-surface);
-            padding: var(--spacing-lg);
-            border-radius: 8px;
-            margin-bottom: var(--spacing-md);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .card h2 {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--color-primary);
-            margin-bottom: var(--spacing-md);
-            padding-bottom: var(--spacing-sm);
-            border-bottom: 2px solid var(--color-border);
-        }
-
-        /* ─── Recommendation List ────────────────────────────────── */
-        .recommendation-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .recommendation-item {
-            padding: var(--spacing-md);
-            border-radius: 6px;
-            background: var(--color-bg);
-            border-left: 4px solid var(--color-primary);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .recommendation-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .recommendation-item.short {
-            border-left-color: var(--color-accent-short);
-            background: rgba(139, 26, 26, 0.05);
-        }
-
-        .recommendation-item.long {
-            border-left-color: var(--color-accent-long);
-            background: rgba(26, 107, 42, 0.05);
-        }
-
-        .recommendation-item.alert {
-            border-left-color: var(--color-accent-alert);
-            background: rgba(217, 119, 6, 0.05);
-        }
-
-        .recommendation-rank {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--color-primary);
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .recommendation-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .recommendation-info h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .recommendation-info p {
-            font-size: 12px;
-            color: var(--color-text-light);
-            margin-bottom: 4px;
-        }
-
-        .recommendation-score {
-            background: var(--color-primary);
+            background: var(--primary);
             color: white;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-            min-width: 50px;
-        }
-
-        .recommendation-score.long {
-            background: var(--color-accent-long);
-        }
-
-        .recommendation-score.short {
-            background: var(--color-accent-short);
-        }
-
-        .recommendation-price {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--color-primary);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .recommendation-reason {
-            font-size: 12px;
-            color: var(--color-text-light);
-            background: var(--color-surface);
-            padding: var(--spacing-xs);
-            border-radius: 4px;
-            line-height: 1.5;
-        }
-
-        /* ─── Chart Container ────────────────────────────────────── */
-        .chart-container {
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .chart-header {
+            padding: 16px 24px;
+            border-radius: var(--radius);
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: var(--spacing-sm);
-            padding: var(--spacing-sm);
-            background: var(--color-bg);
-            border-radius: 6px;
+            box-shadow: var(--shadow);
         }
-
-        .chart-header h3 {
-            font-size: 14px;
+        .header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+        .header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+        .header .date-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
             font-weight: 600;
-            color: var(--color-primary);
         }
 
-        .chart-header .code {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--color-text);
+        /* ── Tabs ── */
+        .tabs {
+            display: flex; gap: 4px;
+            background: var(--surface);
+            padding: 6px;
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
         }
-
-        .chart {
-            background: white;
-            border-radius: 6px;
-            overflow: hidden;
-            height: 350px;
+        .tab-btn {
+            flex: 1; padding: 10px;
+            border: none; background: transparent;
+            color: var(--text-light);
+            font-size: 14px; font-weight: 500;
+            cursor: pointer; border-radius: 6px;
+            transition: all 0.2s;
         }
-
-        /* ─── Table ──────────────────────────────────────────────── */
-        .table-container {
-            overflow-x: auto;
-            border-radius: 6px;
-            background: white;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-
-        thead {
-            background: var(--color-primary);
+        .tab-btn.active {
+            background: var(--primary);
             color: white;
-        }
-
-        th {
-            padding: var(--spacing-sm) var(--spacing-md);
-            text-align: left;
-            font-weight: 600;
-            border: none;
-        }
-
-        td {
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        tbody tr:hover {
-            background: var(--color-bg);
-        }
-
-        .type-short {
-            color: var(--color-accent-short);
             font-weight: 600;
         }
+        .tab-btn:hover:not(.active) { background: var(--bg); color: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        .type-long {
-            color: var(--color-accent-long);
-            font-weight: 600;
+        /* ── Card ── */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-size: 15px; font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+            display: flex; align-items: center; gap: 8px;
         }
 
-        .type-disposal {
-            color: var(--color-accent-alert);
-            font-weight: 600;
-        }
-
-        /* ─── Statistics ─────────────────────────────────────────── */
-        .statistics {
+        /* ── 推薦卡片網格 ── */
+        .rec-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--spacing-md);
-            margin-top: var(--spacing-md);
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 12px;
         }
 
-        .stat-box {
-            background: var(--color-bg);
-            padding: var(--spacing-md);
-            border-radius: 6px;
-            text-align: center;
-            border-top: 3px solid var(--color-primary);
+        .rec-card {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
         }
+        .rec-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
 
-        .stat-number {
-            font-size: 28px;
+        .rec-card-header {
+            padding: 14px 16px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        .rec-card.short .rec-card-header { background: var(--short); color: white; }
+        .rec-card.long  .rec-card-header { background: var(--long);  color: white; }
+
+        .rec-rank { font-size: 28px; font-weight: 800; opacity: 0.9; line-height: 1; }
+        .rec-name { font-size: 16px; font-weight: 700; }
+        .rec-code { font-size: 12px; opacity: 0.85; }
+        .rec-score-badge {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
             font-weight: 700;
-            color: var(--color-primary);
-            margin-bottom: var(--spacing-xs);
         }
 
-        .stat-label {
-            font-size: 12px;
-            color: var(--color-text-light);
-            font-weight: 500;
+        .rec-card-body { padding: 14px 16px; background: white; }
+
+        .rec-price-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px;
+        }
+        .rec-price { font-size: 20px; font-weight: 700; color: var(--primary); }
+        .rec-price-label { font-size: 11px; color: var(--text-light); }
+
+        /* 風險評分 */
+        .risk-row {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 10px;
+        }
+        .risk-label { font-size: 11px; color: var(--text-light); white-space: nowrap; }
+        .risk-bar-wrap {
+            flex: 1; height: 6px;
+            background: var(--border); border-radius: 3px;
+            overflow: hidden;
+        }
+        .risk-bar {
+            height: 100%; border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+        .risk-bar.low  { background: var(--risk-low); }
+        .risk-bar.medium { background: var(--risk-mid); }
+        .risk-bar.high { background: var(--risk-high); }
+        .risk-score-num {
+            font-size: 12px; font-weight: 700;
+            min-width: 28px; text-align: right;
+        }
+        .risk-score-num.low  { color: var(--risk-low); }
+        .risk-score-num.medium { color: var(--risk-mid); }
+        .risk-score-num.high { color: var(--risk-high); }
+
+        /* 支撐阻力 */
+        .sr-row {
+            display: flex; gap: 8px; margin-bottom: 10px;
+        }
+        .sr-item {
+            flex: 1; background: var(--bg);
+            border-radius: 6px; padding: 6px 10px; text-align: center;
+        }
+        .sr-item-label { font-size: 10px; color: var(--text-light); margin-bottom: 2px; }
+        .sr-item-val   { font-size: 14px; font-weight: 700; }
+        .sr-support    { border-top: 2px solid var(--risk-low); }
+        .sr-resistance { border-top: 2px solid var(--risk-high); }
+        .sr-support .sr-item-val    { color: var(--risk-low); }
+        .sr-resistance .sr-item-val { color: var(--risk-high); }
+
+        /* 操作建議 */
+        .advice-box {
+            background: #F8F9FF;
+            border-left: 3px solid var(--primary);
+            border-radius: 0 6px 6px 0;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+        }
+        .advice-box .advice-title { font-size: 10px; color: var(--text-light); margin-bottom: 4px; }
+        .advice-box .advice-text  { font-size: 12px; color: var(--text); line-height: 1.5; }
+
+        .advice-params {
+            display: flex; gap: 6px;
+        }
+        .advice-param {
+            flex: 1; text-align: center;
+            background: var(--bg); border-radius: 4px;
+            padding: 5px 4px;
+        }
+        .advice-param-label { font-size: 9px; color: var(--text-light); }
+        .advice-param-val   { font-size: 12px; font-weight: 700; color: var(--primary); }
+        .advice-param.stop  .advice-param-val { color: var(--risk-high); }
+        .advice-param.target .advice-param-val { color: var(--risk-low); }
+
+        /* 理由 */
+        .reason-box {
+            font-size: 11px; color: var(--text-light);
+            background: var(--bg); padding: 8px 10px;
+            border-radius: 6px; line-height: 1.6;
         }
 
-        /* ─── Empty State ────────────────────────────────────────── */
-        .empty-state {
-            text-align: center;
-            padding: var(--spacing-xl);
-            color: var(--color-text-light);
+        /* ── 圖表區 ── */
+        .stock-selector {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            margin-bottom: 14px;
         }
-
-        .empty-state p {
-            margin-bottom: var(--spacing-sm);
+        .stock-btn {
+            padding: 5px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            background: white;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-
-        /* ─── Responsive ─────────────────────────────────────────── */
-        @media (max-width: 768px) {
-            .container {
-                padding: var(--spacing-xs);
-            }
-
-            .header {
-                padding: var(--spacing-md);
-            }
-
-            .header h1 {
-                font-size: 24px;
-            }
-
-            .recommendation-list {
-                grid-template-columns: 1fr;
-            }
-
-            .tabs {
-                flex-wrap: wrap;
-            }
-
-            .chart {
-                height: 250px;
-            }
-
-            .statistics {
-                grid-template-columns: 1fr;
-            }
+        .stock-btn:hover, .stock-btn.active {
+            background: var(--primary); color: white;
+            border-color: var(--primary);
         }
+        .stock-btn.short-type.active { background: var(--short); border-color: var(--short); }
+        .stock-btn.long-type.active  { background: var(--long);  border-color: var(--long);  }
 
-        /* ─── Loading ────────────────────────────────────────────── */
-        .loading {
-            text-align: center;
-            padding: var(--spacing-xl);
-            color: var(--color-text-light);
+        .chart-wrap { position: relative; }
+        #main-chart { height: 340px; }
+        #volume-chart { height: 100px; margin-top: 4px; }
+
+        .chart-legend {
+            display: flex; gap: 16px; flex-wrap: wrap;
+            margin-bottom: 10px; font-size: 12px;
         }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-dot  { width: 10px; height: 3px; border-radius: 2px; }
 
+        /* 支撐阻力 badges */
+        .sr-badges {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .sr-badge {
+            font-size: 11px; padding: 3px 10px;
+            border-radius: 20px; font-weight: 600;
+        }
+        .sr-badge.support    { background: #EAFAF1; color: var(--risk-low); border: 1px solid #A9DFBF; }
+        .sr-badge.resistance { background: #FDEDEC; color: var(--risk-high); border: 1px solid #F1948A; }
+
+        /* ── 處置預警 ── */
+        .alert-card {
+            background: #FFFBF0;
+            border-left: 4px solid var(--alert);
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+        }
+        .alert-card-header { display: flex; justify-content: space-between; align-items: center; }
+        .alert-name { font-weight: 700; font-size: 15px; }
+        .alert-status {
+            font-size: 11px; padding: 3px 10px;
+            background: var(--alert); color: white;
+            border-radius: 20px; font-weight: 600;
+        }
+        .alert-prices { display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: var(--text-light); }
+
+        /* ── 歷史表格 ── */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead { background: var(--primary); color: white; }
+        th { padding: 10px 14px; font-weight: 600; text-align: left; }
+        td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+        tbody tr:hover { background: var(--bg); }
+        .badge-short { background: #FDEDEC; color: var(--short); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .badge-long  { background: #EAFAF1; color: var(--long);  padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+
+        /* ── 統計 ── */
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+        .stat-box {
+            background: var(--bg); border-radius: 8px; padding: 16px;
+            text-align: center; border-top: 3px solid var(--primary);
+        }
+        .stat-num   { font-size: 30px; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+
+        /* ── Empty / Loading ── */
+        .empty { text-align: center; padding: 32px; color: var(--text-light); }
         .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--color-border);
-            border-top-color: var(--color-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            display: inline-block; width: 18px; height: 18px;
+            border: 2px solid var(--border); border-top-color: var(--primary);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .header { flex-direction: column; gap: 8px; text-align: center; }
+            .header .meta { text-align: center; }
+            .rec-grid { grid-template-columns: 1fr; }
+            #main-chart { height: 260px; }
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <div>
             <h1>🎯 阿福交易儀表板</h1>
-            <p id="updated-time">更新時間：</p>
+            <div class="meta" id="updated-time">載入中...</div>
         </div>
+        <div class="date-badge" id="date-badge">--</div>
+    </div>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab-button active" data-tab="daily">今日推薦</button>
-            <button class="tab-button" data-tab="history">歷史回溯</button>
-            <button class="tab-button" data-tab="statistics">統計分析</button>
-        </div>
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="daily">今日推薦</button>
+        <button class="tab-btn" data-tab="history">歷史回溯</button>
+        <button class="tab-btn" data-tab="statistics">統計分析</button>
+    </div>
 
-        <!-- Tab Content: Daily Recommendations -->
-        <div id="daily" class="tab-content active">
-            <!-- Short Recommendations -->
-            <div class="card">
-                <h2>空方推薦 Top 3</h2>
-                <div class="recommendation-list" id="short-list">
-                    <div class="loading"><div class="spinner"></div> 加載中...</div>
-                </div>
-            </div>
+    <!-- 今日推薦 -->
+    <div id="daily" class="tab-content active">
 
-            <!-- Long Recommendations -->
-            <div class="card">
-                <h2>多方推薦 Top 3</h2>
-                <div class="recommendation-list" id="long-list">
-                    <div class="loading"><div class="spinner"></div> 加載中...</div>
-                </div>
-            </div>
-
-            <!-- Disposal Alert -->
-            <div class="card">
-                <h2>處置預警</h2>
-                <div class="recommendation-list" id="alert-list">
-                    <div class="empty-state"><p>無警訊</p></div>
-                </div>
-            </div>
-
-            <!-- K Line Charts -->
-            <div class="card">
-                <h2>技術圖表（K線 + 布林軌道）</h2>
-                <div id="charts-container"></div>
+        <!-- 空方 -->
+        <div class="card">
+            <div class="card-title">🔴 空方推薦 Top 3</div>
+            <div class="rec-grid" id="short-list">
+                <div class="empty"><div class="spinner"></div></div>
             </div>
         </div>
 
-        <!-- Tab Content: History -->
-        <div id="history" class="tab-content">
-            <div class="card">
-                <h2>過去 30 天推薦記錄</h2>
-                <div class="table-container">
-                    <table id="history-table">
-                        <thead>
-                            <tr>
-                                <th>日期</th>
-                                <th>代號</th>
-                                <th>名稱</th>
-                                <th>類型</th>
-                                <th>評分</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-tbody">
-                            <tr><td colspan="5" class="loading"><div class="spinner"></div> 加載中...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!-- 多方 -->
+        <div class="card">
+            <div class="card-title">🟢 多方推薦 Top 3</div>
+            <div class="rec-grid" id="long-list">
+                <div class="empty"><div class="spinner"></div></div>
             </div>
         </div>
 
-        <!-- Tab Content: Statistics -->
-        <div id="statistics" class="tab-content">
-            <div class="card">
-                <h2>推薦統計</h2>
-                <div class="statistics" id="statistics-container">
-                    <div class="loading"><div class="spinner"></div> 加載中...</div>
-                </div>
+        <!-- 處置預警 -->
+        <div class="card">
+            <div class="card-title">⚠️ 注意處置預警</div>
+            <div id="alert-list"><div class="empty">無預警</div></div>
+        </div>
+
+        <!-- K 線圖 -->
+        <div class="card">
+            <div class="card-title">📈 技術圖表</div>
+            <div class="stock-selector" id="stock-selector"></div>
+            <div class="sr-badges" id="sr-badges"></div>
+            <div class="chart-legend">
+                <span class="legend-item"><span class="legend-dot" style="background:#1A3A52;height:2px"></span> 20日均線</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#D97706;border-top:2px dashed #D97706;height:0"></span> 布林上軌</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#2980B9;border-top:2px dashed #2980B9;height:0"></span> 布林下軌</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#E74C3C;"></span> 阻力位</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#27AE60;"></span> 支撐位</span>
+            </div>
+            <div class="chart-wrap">
+                <div id="main-chart"></div>
+                <div id="volume-chart"></div>
             </div>
         </div>
     </div>
 
+    <!-- 歷史回溯 -->
+    <div id="history" class="tab-content">
+        <div class="card">
+            <div class="card-title">📋 過去 30 天推薦記錄</div>
+            <div style="overflow-x:auto">
+                <table>
+                    <thead><tr><th>日期</th><th>代號</th><th>名稱</th><th>類型</th><th>評分</th></tr></thead>
+                    <tbody id="history-tbody"><tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        // 儀表板資料已嵌入
-        window.dashboardData = {"date": "20260428", "updated_at": "2026-04-28 22:00:50", "daily_recommendations": {"short": [{"rank": 1, "code": "4973", "name": "廣穎", "score": 16, "price": 0.0, "reason": "周轉率31.2%(高)；主力賣-7.3%；主力持續賣(5日-5%/10日-1%)；乖離年線130%(高位)；當沖比24%；位階8(上軌附近)；乖離月線18.1%"}, {"rank": 2, "code": "8027", "name": "鈦昇", "score": 14, "price": 0.0, "reason": "周轉率15.2%；主力持續賣(5日-1%/10日-3%)；乖離年線64%(高位)；當沖比113%(極強隔日沖)；位階10(上軌附近)"}, {"rank": 3, "code": "4927", "name": "泰鼎-KY", "score": 14, "price": 0.0, "reason": "周轉率14.1%；主力賣-11.3%；乖離年線97%(高位)；當沖比62%(強隔日沖)；位階9(上軌附近)；乖離月線22.6%"}], "long": [{"rank": 1, "code": "8103", "name": "瀚荃", "score": 16, "price": 0.0, "reason": "強勢回測+主力連買；強勢回測(位階13/斜率2.40)；高位回測；主力連買5天(5日7%/10日6%)；連買5天以上"}, {"rank": 2, "code": "8027", "name": "鈦昇", "score": 10, "price": 0.0, "reason": "強勢回測；強勢回測(位階10/斜率1.08)；高位回測；當沖比113%"}, {"rank": 3, "code": "1727", "name": "中華化", "score": 10, "price": 0.0, "reason": "強勢回測；強勢回測(位階10/斜率2.22)；高位回測；當沖比159%"}], "disposal_alert": [{"code": "6658", "name": "聯策", "status": "注意中→即將處置", "upper_price": 138.17, "lower_price": 128.83}, {"code": "3645", "name": "達邁", "status": "注意中→即將處置", "upper_price": 104.53, "lower_price": 97.47}, {"code": "6789", "name": "采鈺", "status": "注意中→即將處置", "upper_price": 581.67, "lower_price": 542.33}, {"code": "7711", "name": "永擎", "status": "注意中→即將處置", "upper_price": 447.12, "lower_price": 416.88}]}, "price_data": {}, "history": [], "metadata": {"bollinger_period": 20, "bollinger_std_dev": 2, "history_days": 30, "total_recommendations": 6, "total_history_records": 0}};
-    </script>
-    <script>
-        // ─── Load JSON Data ──────────────────────────────────────
-        function loadDashboardData() {
-            dashboardData = window.dashboardData;
+    <!-- 統計分析 -->
+    <div id="statistics" class="tab-content">
+        <div class="card">
+            <div class="card-title">📊 推薦統計</div>
+            <div class="stat-grid" id="stat-grid">
+                <div class="empty"><div class="spinner"></div></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let dashboardData = null;
+    let mainChart = null;
+    let volumeChart = null;
+    let currentCode = null;
+
+    // ── Tab 切換 ──────────────────────────────────────────
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // ── 資料載入（html_generator.py 會替換這個函式）──────
+    async function loadDashboardData() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataUrl = urlParams.get('data') || 'dashboard_data.json';
+            const res = await fetch(dataUrl);
+            if (!res.ok) throw new Error('無法加載資料');
+            dashboardData = await res.json();
             renderDashboard();
+        } catch(e) {
+            document.body.innerHTML = `<div style="padding:40px;text-align:center;color:#718096">
+                <p style="font-size:18px;margin-bottom:8px">❌ 無法加載儀表板資料</p>
+                <p style="font-size:13px">${e.message}</p></div>`;
         }
+    }
 
+    // ── 主渲染 ────────────────────────────────────────────
+    function renderDashboard() {
+        if (!dashboardData) return;
 
-        // ─── Render Dashboard ────────────────────────────────────
-        function renderDashboard() {
-            if (!dashboardData) return;
+        // Header
+        document.getElementById('updated-time').textContent = `更新時間：${dashboardData.updated_at}`;
+        const d = dashboardData.date;
+        document.getElementById('date-badge').textContent =
+            `${d.slice(0,4)}/${d.slice(4,6)}/${d.slice(6,8)}`;
 
-            // Update header time
-            document.getElementById('updated-time').textContent = `更新時間：${dashboardData.updated_at}`;
+        renderRecommendations();
+        renderAlerts();
+        buildStockSelector();
+        renderHistory();
+        renderStatistics();
+    }
 
-            // Render recommendations
-            renderRecommendations();
+    // ── 推薦卡片 ──────────────────────────────────────────
+    function renderRecommendations() {
+        const { short = [], long = [] } = dashboardData.daily_recommendations;
 
-            // Render charts
-            renderCharts();
+        document.getElementById('short-list').innerHTML = short.length
+            ? short.map(item => recCard(item, 'short')).join('')
+            : '<div class="empty">今日無做空推薦</div>';
 
-            // Render history
-            renderHistory();
+        document.getElementById('long-list').innerHTML = long.length
+            ? long.map(item => recCard(item, 'long')).join('')
+            : '<div class="empty">今日無做多推薦</div>';
+    }
 
-            // Render statistics
-            renderStatistics();
-        }
+    function recCard(item, type) {
+        const price  = item.price > 0 ? `NT$${item.price.toFixed(2)}` : 'N/A';
+        const score  = item.risk_score ?? 50;
+        const level  = item.risk_level ?? 'medium';
+        const advice = item.advice ?? {};
+        const adv    = advice.summary ?? '等待訊號';
+        const sl     = advice.stop_loss ? `NT$${advice.stop_loss}` : '—';
+        const tgt    = advice.target    ? `NT$${advice.target}`    : '—';
+        const sup    = advice.support    ? `NT$${advice.support}`   : '—';
+        const res    = advice.resistance ? `NT$${advice.resistance}` : '—';
 
-        function renderRecommendations() {
-            const { short = [], long = [], disposal_alert = [] } = dashboardData.daily_recommendations;
+        const riskLabelMap = { low: '低風險', medium: '中風險', high: '高風險' };
 
-            // Short list
-            const shortHTML = short.length > 0
-                ? short.map((item, idx) => `
-                    <div class="recommendation-item short">
-                        <div class="recommendation-rank">${item.rank}</div>
-                        <div class="recommendation-header">
-                            <div class="recommendation-info">
-                                <h3>${item.code} ${item.name}</h3>
-                                <p>現價：NT$${item.price.toFixed(2)}</p>
-                            </div>
-                            <div class="recommendation-score short">評分 ${item.score}</div>
-                        </div>
-                        <div class="recommendation-price">做空理由</div>
-                        <div class="recommendation-reason">${item.reason}</div>
+        return `
+        <div class="rec-card ${type}" onclick="showChart('${item.code}')">
+            <div class="rec-card-header">
+                <div>
+                    <div class="rec-rank">${item.rank}</div>
+                    <div class="rec-name">${item.name}</div>
+                    <div class="rec-code">${item.code}</div>
+                </div>
+                <div>
+                    <div class="rec-score-badge">評分 ${item.score}</div>
+                </div>
+            </div>
+            <div class="rec-card-body">
+                <div class="rec-price-row">
+                    <div>
+                        <div class="rec-price">${price}</div>
+                        <div class="rec-price-label">現價</div>
                     </div>
-                `).join('')
-                : '<div class="empty-state"><p>今日無做空推薦</p></div>';
-
-            document.getElementById('short-list').innerHTML = shortHTML;
-
-            // Long list
-            const longHTML = long.length > 0
-                ? long.map((item, idx) => `
-                    <div class="recommendation-item long">
-                        <div class="recommendation-rank">${item.rank}</div>
-                        <div class="recommendation-header">
-                            <div class="recommendation-info">
-                                <h3>${item.code} ${item.name}</h3>
-                                <p>現價：NT$${item.price.toFixed(2)}</p>
-                            </div>
-                            <div class="recommendation-score long">評分 ${item.score}</div>
-                        </div>
-                        <div class="recommendation-price">做多理由</div>
-                        <div class="recommendation-reason">${item.reason}</div>
+                    <div style="text-align:right">
+                        <div style="font-size:11px;color:var(--text-light)">風險評估</div>
+                        <div class="risk-score-num ${level}">${riskLabelMap[level]}</div>
                     </div>
-                `).join('')
-                : '<div class="empty-state"><p>今日無做多推薦</p></div>';
+                </div>
 
-            document.getElementById('long-list').innerHTML = longHTML;
+                <div class="risk-row">
+                    <div class="risk-label">風險 ${score}</div>
+                    <div class="risk-bar-wrap"><div class="risk-bar ${level}" style="width:${score}%"></div></div>
+                </div>
 
-            // Alert list
-            const alertHTML = disposal_alert.length > 0
-                ? disposal_alert.map((item, idx) => `
-                    <div class="recommendation-item alert">
-                        <div class="recommendation-header">
-                            <div class="recommendation-info">
-                                <h3>${item.code} ${item.name}</h3>
-                                <p>狀態：${item.status}</p>
-                            </div>
-                        </div>
-                        <div style="font-size: 12px; color: var(--color-text-light);">
-                            <p>上門檻：NT$${item.upper_price.toFixed(2)}</p>
-                            <p>下門檻：NT$${item.lower_price.toFixed(2)}</p>
-                        </div>
+                <div class="sr-row">
+                    <div class="sr-item sr-support">
+                        <div class="sr-item-label">支撐位</div>
+                        <div class="sr-item-val">${sup}</div>
                     </div>
-                `).join('')
-                : '<div class="empty-state"><p>無處置預警</p></div>';
-
-            document.getElementById('alert-list').innerHTML = alertHTML;
-        }
-
-        function renderCharts() {
-            const container = document.getElementById('charts-container');
-            const { price_data = {} } = dashboardData;
-
-            if (Object.keys(price_data).length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>無可用的圖表資料</p></div>';
-                return;
-            }
-
-            const chartPromises = [];
-
-            Object.entries(price_data).forEach(([code, data]) => {
-                if (!data.closes || data.closes.length === 0) return;
-
-                const chartDiv = document.createElement('div');
-                chartDiv.innerHTML = `
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <h3>${code}</h3>
-                            <span class="code">${data.closes[data.closes.length - 1].toFixed(2)}</span>
-                        </div>
-                        <div id="chart-${code}" class="chart"></div>
+                    <div class="sr-item sr-resistance">
+                        <div class="sr-item-label">阻力位</div>
+                        <div class="sr-item-val">${res}</div>
                     </div>
-                `;
-                container.appendChild(chartDiv);
-
-                // Prepare chart data
-                const candleData = data.dates.map((date, idx) => ({
-                    x: new Date(date).getTime(),
-                    y: [data.opens?.[idx] || data.closes[idx], data.highs[idx], data.lows[idx], data.closes[idx]]
-                }));
-
-                // Prepare BB data (only last 20 points)
-                const bbStart = data.closes.length - (data.bollinger_bands?.sma?.length || 0);
-                const bbDates = data.dates.slice(bbStart);
-                const bbUpper = data.bollinger_bands?.upper || [];
-                const bbLower = data.bollinger_bands?.lower || [];
-                const bbSma = data.bollinger_bands?.sma || [];
-
-                const bbUpperData = bbDates.map((date, idx) => ({
-                    x: new Date(date).getTime(),
-                    y: bbUpper[idx]?.toFixed(2) || null
-                }));
-
-                const bbLowerData = bbDates.map((date, idx) => ({
-                    x: new Date(date).getTime(),
-                    y: bbLower[idx]?.toFixed(2) || null
-                }));
-
-                const bbSmaData = bbDates.map((date, idx) => ({
-                    x: new Date(date).getTime(),
-                    y: bbSma[idx]?.toFixed(2) || null
-                }));
-
-                const options = {
-                    chart: {
-                        type: 'candlestick',
-                        height: 350,
-                        toolbar: {
-                            show: false
-                        },
-                        zoom: {
-                            enabled: false
-                        }
-                    },
-                    series: [
-                        {
-                            name: 'K線',
-                            data: candleData
-                        },
-                        {
-                            name: '上軌',
-                            type: 'line',
-                            data: bbUpperData,
-                            stroke: { width: 2, dashArray: 4 },
-                            color: '#D97706'
-                        },
-                        {
-                            name: '20日均線',
-                            type: 'line',
-                            data: bbSmaData,
-                            stroke: { width: 2 },
-                            color: '#1A3A52'
-                        },
-                        {
-                            name: '下軌',
-                            type: 'line',
-                            data: bbLowerData,
-                            stroke: { width: 2, dashArray: 4 },
-                            color: '#8B1A1A'
-                        }
-                    ],
-                    xaxis: {
-                        type: 'datetime',
-                        labels: {
-                            format: 'MM/dd'
-                        }
-                    },
-                    yaxis: {
-                        labels: {
-                            formatter: function(val) {
-                                return val?.toFixed(2) || '';
-                            }
-                        }
-                    },
-                    plotOptions: {
-                        candlestick: {
-                            colors: {
-                                upward: '#1A6B2A',
-                                downward: '#8B1A1A'
-                            }
-                        }
-                    },
-                    legend: {
-                        position: 'top'
-                    }
-                };
-
-                const chart = new ApexCharts(document.getElementById(`chart-${code}`), options);
-                chart.render();
-            });
-        }
-
-        function renderHistory() {
-            const { history = [] } = dashboardData;
-            const tbody = document.getElementById('history-tbody');
-
-            if (history.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暫無歷史記錄</td></tr>';
-                return;
-            }
-
-            const rows = history
-                .sort((a, b) => b.date.localeCompare(a.date))
-                .map(item => {
-                    const typeClass = item.type === 'short' ? 'type-short' : item.type === 'long' ? 'type-long' : 'type-disposal';
-                    const typeLabel = item.type === 'short' ? '做空' : item.type === 'long' ? '做多' : '處置';
-
-                    return `
-                        <tr>
-                            <td>${item.date}</td>
-                            <td><strong>${item.code}</strong></td>
-                            <td>${item.name}</td>
-                            <td><span class="${typeClass}">${typeLabel}</span></td>
-                            <td>${item.score}</td>
-                        </tr>
-                    `;
-                }).join('');
-
-            tbody.innerHTML = rows;
-        }
-
-        function renderStatistics() {
-            const { daily_recommendations = {}, history = [], metadata = {} } = dashboardData;
-            const { short = [], long = [], disposal_alert = [] } = daily_recommendations;
-
-            const totalShort = history.filter(h => h.type === 'short').length;
-            const totalLong = history.filter(h => h.type === 'long').length;
-            const totalDisposal = history.filter(h => h.type === 'disposal').length;
-            const totalRecommendations = totalShort + totalLong;
-
-            const statsHTML = `
-                <div class="stat-box">
-                    <div class="stat-number">${short.length}</div>
-                    <div class="stat-label">今日做空推薦</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-number">${long.length}</div>
-                    <div class="stat-label">今日做多推薦</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">${totalShort}</div>
-                    <div class="stat-label">30天做空推薦</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">${totalLong}</div>
-                    <div class="stat-label">30天做多推薦</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">${totalRecommendations}</div>
-                    <div class="stat-label">總推薦次數</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">${totalDisposal}</div>
-                    <div class="stat-label">處置預警次數</div>
-                </div>
-            `;
 
-            document.getElementById('statistics-container').innerHTML = statsHTML;
-        }
+                <div class="advice-box">
+                    <div class="advice-title">操作建議</div>
+                    <div class="advice-text">${adv}</div>
+                </div>
 
-        // ─── Tab Navigation ──────────────────────────────────────
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const tabName = e.target.dataset.tab;
+                <div class="advice-params">
+                    <div class="advice-param"><div class="advice-param-label">進場</div><div class="advice-param-val">${price}</div></div>
+                    <div class="advice-param stop"><div class="advice-param-label">止損</div><div class="advice-param-val">${sl}</div></div>
+                    <div class="advice-param target"><div class="advice-param-label">目標</div><div class="advice-param-val">${tgt}</div></div>
+                </div>
 
-                // Update active button
-                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
+                <div class="reason-box" style="margin-top:10px">${item.reason}</div>
+            </div>
+        </div>`;
+    }
 
-                // Update active content
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                document.getElementById(tabName).classList.add('active');
-            });
+    // ── 處置預警 ──────────────────────────────────────────
+    function renderAlerts() {
+        const alerts = dashboardData.daily_recommendations.disposal_alert ?? [];
+        const el = document.getElementById('alert-list');
+        el.innerHTML = alerts.length
+            ? alerts.map(a => `
+                <div class="alert-card">
+                    <div class="alert-card-header">
+                        <div class="alert-name">${a.code} ${a.name}</div>
+                        <div class="alert-status">${a.status}</div>
+                    </div>
+                    <div class="alert-prices">
+                        <span>漲停門檻：NT$${a.upper_price?.toFixed(2) ?? 'N/A'}</span>
+                        <span>跌停門檻：NT$${a.lower_price?.toFixed(2) ?? 'N/A'}</span>
+                    </div>
+                </div>`).join('')
+            : '<div class="empty">目前無注意處置標的</div>';
+    }
+
+    // ── 股票選擇器 ────────────────────────────────────────
+    function buildStockSelector() {
+        const { short = [], long = [] } = dashboardData.daily_recommendations;
+        const codes = [
+            ...short.map(r => ({ code: r.code, name: r.name, type: 'short' })),
+            ...long.map(r  => ({ code: r.code, name: r.name, type: 'long'  }))
+        ];
+
+        const selector = document.getElementById('stock-selector');
+        selector.innerHTML = codes.map(c => `
+            <button class="stock-btn ${c.type}-type" onclick="showChart('${c.code}')" data-code="${c.code}">
+                ${c.code} ${c.name}
+            </button>`).join('');
+
+        if (codes.length > 0) showChart(codes[0].code);
+    }
+
+    // ── K 線 + 成交量圖表 ─────────────────────────────────
+    function showChart(code) {
+        currentCode = code;
+
+        // 更新 selector 狀態
+        document.querySelectorAll('.stock-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.code === code);
         });
 
-        // ─── Initialize ───────────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', loadDashboardData);
-    </script>
+        const data = dashboardData.price_data?.[code];
+        if (!data || !data.closes?.length) {
+            document.getElementById('main-chart').innerHTML =
+                '<div class="empty">此標的無 K 線資料（非交易時段）</div>';
+            document.getElementById('volume-chart').innerHTML = '';
+            document.getElementById('sr-badges').innerHTML = '';
+            return;
+        }
+
+        renderSRBadges(code, data);
+        renderMainChart(code, data);
+        renderVolumeChart(code, data);
+    }
+
+    function renderSRBadges(code, data) {
+        const sr = data.support_resistance ?? {};
+        const badges = document.getElementById('sr-badges');
+        const sup = sr.support ? `NT$${sr.support}` : null;
+        const res = sr.resistance ? `NT$${sr.resistance}` : null;
+        const pHigh = sr.period_high ? `NT$${sr.period_high}` : null;
+        const pLow  = sr.period_low  ? `NT$${sr.period_low}`  : null;
+
+        badges.innerHTML = [
+            sup   ? `<span class="sr-badge support">支撐 ${sup}</span>` : '',
+            res   ? `<span class="sr-badge resistance">阻力 ${res}</span>` : '',
+            pHigh ? `<span class="sr-badge resistance">近期高 ${pHigh}</span>` : '',
+            pLow  ? `<span class="sr-badge support">近期低 ${pLow}</span>` : '',
+        ].join('');
+    }
+
+    function renderMainChart(code, data) {
+        if (mainChart) { mainChart.destroy(); mainChart = null; }
+
+        const bb = data.bollinger_bands ?? {};
+        const sr = data.support_resistance ?? {};
+        const bbLen = bb.sma?.length ?? 0;
+        const startIdx = data.closes.length - bbLen;
+
+        // K 線資料
+        const candles = data.dates.map((date, i) => ({
+            x: new Date(date).getTime(),
+            y: [data.closes[i], data.highs[i], data.lows[i], data.closes[i]]
+        }));
+
+        // BB 資料
+        const bbDates = data.dates.slice(startIdx);
+        const mkLine = (arr) => bbDates.map((d, i) => ({ x: new Date(d).getTime(), y: arr[i] ? +arr[i].toFixed(2) : null }));
+
+        const annotations = { yaxis: [] };
+        if (sr.support)    annotations.yaxis.push({ y: sr.support,    borderColor: '#27AE60', label: { text: `支撐 ${sr.support}`, style: { color: '#fff', background: '#27AE60', fontSize: '10px' } } });
+        if (sr.resistance) annotations.yaxis.push({ y: sr.resistance, borderColor: '#E74C3C', label: { text: `阻力 ${sr.resistance}`, style: { color: '#fff', background: '#E74C3C', fontSize: '10px' } } });
+
+        const opts = {
+            chart: { type: 'candlestick', height: 340, id: 'candles', group: 'stock',
+                toolbar: { show: true, tools: { download: false, selection: true, zoom: true, zoomin: true, zoomout: true, pan: true, reset: true } },
+                animations: { enabled: false } },
+            annotations,
+            series: [
+                { name: 'K線', type: 'candlestick', data: candles },
+                { name: '20日均線', type: 'line', data: mkLine(bb.sma ?? []) },
+                { name: '布林上軌', type: 'line', data: mkLine(bb.upper ?? []) },
+                { name: '布林下軌', type: 'line', data: mkLine(bb.lower ?? []) },
+            ],
+            stroke: { width: [1, 2, 1.5, 1.5], dashArray: [0, 0, 4, 4], curve: 'smooth' },
+            colors: ['transparent', '#1A3A52', '#D97706', '#2980B9'],
+            xaxis: { type: 'datetime', labels: { format: 'MM/dd', style: { fontSize: '10px' } } },
+            yaxis: { labels: { formatter: v => v?.toFixed(1) ?? '' }, tooltip: { enabled: true } },
+            tooltip: { shared: true, x: { format: 'yyyy/MM/dd' } },
+            legend: { show: false },
+            grid: { borderColor: '#F0F2F5' },
+            plotOptions: {
+                candlestick: {
+                    colors: { upward: '#E74C3C', downward: '#27AE60' },
+                    wick: { useFillColor: true }
+                }
+            }
+        };
+
+        mainChart = new ApexCharts(document.getElementById('main-chart'), opts);
+        mainChart.render();
+    }
+
+    function renderVolumeChart(code, data) {
+        if (volumeChart) { volumeChart.destroy(); volumeChart = null; }
+        if (!data.volumes?.length) return;
+
+        const volData = data.dates.map((d, i) => ({
+            x: new Date(d).getTime(),
+            y: data.volumes[i]
+        }));
+
+        const colors = data.dates.map((d, i) => {
+            if (i === 0) return '#aaa';
+            return data.closes[i] >= data.closes[i-1] ? '#E74C3C' : '#27AE60';
+        });
+
+        const opts = {
+            chart: { type: 'bar', height: 100, id: 'volume', group: 'stock',
+                toolbar: { show: false }, animations: { enabled: false },
+                brush: { target: 'candles', enabled: true } },
+            series: [{ name: '成交量', data: volData }],
+            colors,
+            fill: { colors },
+            plotOptions: { bar: { columnWidth: '80%' } },
+            xaxis: { type: 'datetime', labels: { show: false } },
+            yaxis: { labels: { formatter: v => v > 1000000 ? `${(v/1000000).toFixed(1)}M` : `${(v/1000).toFixed(0)}K`, style: { fontSize: '9px' } } },
+            grid: { borderColor: '#F0F2F5' },
+            tooltip: { x: { format: 'yyyy/MM/dd' }, y: { formatter: v => v?.toLocaleString() + ' 張' } }
+        };
+
+        volumeChart = new ApexCharts(document.getElementById('volume-chart'), opts);
+        volumeChart.render();
+    }
+
+    // ── 歷史回溯 ──────────────────────────────────────────
+    function renderHistory() {
+        const history = dashboardData.history ?? [];
+        const tbody = document.getElementById('history-tbody');
+        tbody.innerHTML = history.length
+            ? history.map(h => `<tr>
+                <td>${h.date?.slice(0,4)}/${h.date?.slice(4,6)}/${h.date?.slice(6,8)}</td>
+                <td>${h.code}</td><td>${h.name}</td>
+                <td><span class="badge-${h.type === 'short' ? 'short' : 'long'}">${h.type === 'short' ? '做空' : '做多'}</span></td>
+                <td>${h.score}</td></tr>`).join('')
+            : '<tr><td colspan="5" class="empty">尚無歷史記錄</td></tr>';
+    }
+
+    // ── 統計分析 ──────────────────────────────────────────
+    function renderStatistics() {
+        const meta = dashboardData.metadata ?? {};
+        const hist = dashboardData.history ?? [];
+        const shortCount = hist.filter(h => h.type === 'short').length;
+        const longCount  = hist.filter(h => h.type === 'long').length;
+
+        document.getElementById('stat-grid').innerHTML = [
+            { num: meta.total_recommendations ?? 0, label: '今日推薦' },
+            { num: meta.total_history_records ?? 0, label: '歷史記錄' },
+            { num: shortCount, label: '空方歷史' },
+            { num: longCount,  label: '多方歷史' },
+        ].map(s => `<div class="stat-box"><div class="stat-num">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
+    }
+
+    // 啟動
+    loadDashboardData();
+</script>
 </body>
 </html>
