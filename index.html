@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿福交易儀表板</title>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #F5F5F5;
+            --color-surface: #FFFFFF;
+            --color-primary: #1A3A52;
+            --color-primary-light: #2A5A72;
+            --color-accent-short: #8B1A1A;
+            --color-accent-long: #1A6B2A;
+            --color-accent-alert: #D97706;
+            --color-text: #2D3748;
+            --color-text-light: #718096;
+            --color-border: #E2E8F0;
+            --spacing-xs: 8px;
+            --spacing-sm: 16px;
+            --spacing-md: 24px;
+            --spacing-lg: 32px;
+            --spacing-xl: 48px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-sm);
+        }
+
+        /* ─── Header ─────────────────────────────────────────────── */
+        .header {
+            background: var(--color-surface);
+            padding: var(--spacing-lg);
+            border-radius: 8px;
+            margin-bottom: var(--spacing-md);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .header p {
+            color: var(--color-text-light);
+            font-size: 14px;
+        }
+
+        /* ─── Tabs ───────────────────────────────────────────────── */
+        .tabs {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            background: var(--color-surface);
+            padding: var(--spacing-sm);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            background: transparent;
+            color: var(--color-text-light);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-button:hover {
+            color: var(--color-primary);
+        }
+
+        /* ─── Content ────────────────────────────────────────────── */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ─── Card ───────────────────────────────────────────────── */
+        .card {
+            background: var(--color-surface);
+            padding: var(--spacing-lg);
+            border-radius: 8px;
+            margin-bottom: var(--spacing-md);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        /* ─── Recommendation List ────────────────────────────────── */
+        .recommendation-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .recommendation-item {
+            padding: var(--spacing-md);
+            border-radius: 6px;
+            background: var(--color-bg);
+            border-left: 4px solid var(--color-primary);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .recommendation-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommendation-item.short {
+            border-left-color: var(--color-accent-short);
+            background: rgba(139, 26, 26, 0.05);
+        }
+
+        .recommendation-item.long {
+            border-left-color: var(--color-accent-long);
+            background: rgba(26, 107, 42, 0.05);
+        }
+
+        .recommendation-item.alert {
+            border-left-color: var(--color-accent-alert);
+            background: rgba(217, 119, 6, 0.05);
+        }
+
+        .recommendation-rank {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .recommendation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .recommendation-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .recommendation-info p {
+            font-size: 12px;
+            color: var(--color-text-light);
+            margin-bottom: 4px;
+        }
+
+        .recommendation-score {
+            background: var(--color-primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 50px;
+        }
+
+        .recommendation-score.long {
+            background: var(--color-accent-long);
+        }
+
+        .recommendation-score.short {
+            background: var(--color-accent-short);
+        }
+
+        .recommendation-price {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .recommendation-reason {
+            font-size: 12px;
+            color: var(--color-text-light);
+            background: var(--color-surface);
+            padding: var(--spacing-xs);
+            border-radius: 4px;
+            line-height: 1.5;
+        }
+
+        /* ─── Chart Container ────────────────────────────────────── */
+        .chart-container {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: var(--color-bg);
+            border-radius: 6px;
+        }
+
+        .chart-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .chart-header .code {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .chart {
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            height: 350px;
+        }
+
+        /* ─── Table ──────────────────────────────────────────────── */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 6px;
+            background: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        th {
+            padding: var(--spacing-sm) var(--spacing-md);
+            text-align: left;
+            font-weight: 600;
+            border: none;
+        }
+
+        td {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        tbody tr:hover {
+            background: var(--color-bg);
+        }
+
+        .type-short {
+            color: var(--color-accent-short);
+            font-weight: 600;
+        }
+
+        .type-long {
+            color: var(--color-accent-long);
+            font-weight: 600;
+        }
+
+        .type-disposal {
+            color: var(--color-accent-alert);
+            font-weight: 600;
+        }
+
+        /* ─── Statistics ─────────────────────────────────────────── */
+        .statistics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .stat-box {
+            background: var(--color-bg);
+            padding: var(--spacing-md);
+            border-radius: 6px;
+            text-align: center;
+            border-top: 3px solid var(--color-primary);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-light);
+            font-weight: 500;
+        }
+
+        /* ─── Empty State ────────────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--color-text-light);
+        }
+
+        .empty-state p {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        /* ─── Responsive ─────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--spacing-xs);
+            }
+
+            .header {
+                padding: var(--spacing-md);
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .recommendation-list {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .chart {
+                height: 250px;
+            }
+
+            .statistics {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── Loading ────────────────────────────────────────────── */
+        .loading {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--color-text-light);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 阿福交易儀表板</h1>
+            <p id="updated-time">更新時間：</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="daily">今日推薦</button>
+            <button class="tab-button" data-tab="history">歷史回溯</button>
+            <button class="tab-button" data-tab="statistics">統計分析</button>
+        </div>
+
+        <!-- Tab Content: Daily Recommendations -->
+        <div id="daily" class="tab-content active">
+            <!-- Short Recommendations -->
+            <div class="card">
+                <h2>空方推薦 Top 3</h2>
+                <div class="recommendation-list" id="short-list">
+                    <div class="loading"><div class="spinner"></div> 加載中...</div>
+                </div>
+            </div>
+
+            <!-- Long Recommendations -->
+            <div class="card">
+                <h2>多方推薦 Top 3</h2>
+                <div class="recommendation-list" id="long-list">
+                    <div class="loading"><div class="spinner"></div> 加載中...</div>
+                </div>
+            </div>
+
+            <!-- Disposal Alert -->
+            <div class="card">
+                <h2>處置預警</h2>
+                <div class="recommendation-list" id="alert-list">
+                    <div class="empty-state"><p>無警訊</p></div>
+                </div>
+            </div>
+
+            <!-- K Line Charts -->
+            <div class="card">
+                <h2>技術圖表（K線 + 布林軌道）</h2>
+                <div id="charts-container"></div>
+            </div>
+        </div>
+
+        <!-- Tab Content: History -->
+        <div id="history" class="tab-content">
+            <div class="card">
+                <h2>過去 30 天推薦記錄</h2>
+                <div class="table-container">
+                    <table id="history-table">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>代號</th>
+                                <th>名稱</th>
+                                <th>類型</th>
+                                <th>評分</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <tr><td colspan="5" class="loading"><div class="spinner"></div> 加載中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Statistics -->
+        <div id="statistics" class="tab-content">
+            <div class="card">
+                <h2>推薦統計</h2>
+                <div class="statistics" id="statistics-container">
+                    <div class="loading"><div class="spinner"></div> 加載中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // 儀表板資料已嵌入
+        window.dashboardData = {"date": "20260428", "updated_at": "2026-04-28 22:00:50", "daily_recommendations": {"short": [{"rank": 1, "code": "4973", "name": "廣穎", "score": 16, "price": 0.0, "reason": "周轉率31.2%(高)；主力賣-7.3%；主力持續賣(5日-5%/10日-1%)；乖離年線130%(高位)；當沖比24%；位階8(上軌附近)；乖離月線18.1%"}, {"rank": 2, "code": "8027", "name": "鈦昇", "score": 14, "price": 0.0, "reason": "周轉率15.2%；主力持續賣(5日-1%/10日-3%)；乖離年線64%(高位)；當沖比113%(極強隔日沖)；位階10(上軌附近)"}, {"rank": 3, "code": "4927", "name": "泰鼎-KY", "score": 14, "price": 0.0, "reason": "周轉率14.1%；主力賣-11.3%；乖離年線97%(高位)；當沖比62%(強隔日沖)；位階9(上軌附近)；乖離月線22.6%"}], "long": [{"rank": 1, "code": "8103", "name": "瀚荃", "score": 16, "price": 0.0, "reason": "強勢回測+主力連買；強勢回測(位階13/斜率2.40)；高位回測；主力連買5天(5日7%/10日6%)；連買5天以上"}, {"rank": 2, "code": "8027", "name": "鈦昇", "score": 10, "price": 0.0, "reason": "強勢回測；強勢回測(位階10/斜率1.08)；高位回測；當沖比113%"}, {"rank": 3, "code": "1727", "name": "中華化", "score": 10, "price": 0.0, "reason": "強勢回測；強勢回測(位階10/斜率2.22)；高位回測；當沖比159%"}], "disposal_alert": [{"code": "6658", "name": "聯策", "status": "注意中→即將處置", "upper_price": 138.17, "lower_price": 128.83}, {"code": "3645", "name": "達邁", "status": "注意中→即將處置", "upper_price": 104.53, "lower_price": 97.47}, {"code": "6789", "name": "采鈺", "status": "注意中→即將處置", "upper_price": 581.67, "lower_price": 542.33}, {"code": "7711", "name": "永擎", "status": "注意中→即將處置", "upper_price": 447.12, "lower_price": 416.88}]}, "price_data": {}, "history": [], "metadata": {"bollinger_period": 20, "bollinger_std_dev": 2, "history_days": 30, "total_recommendations": 6, "total_history_records": 0}};
+    </script>
+    <script>
+        // ─── Load JSON Data ──────────────────────────────────────
+        function loadDashboardData() {
+            dashboardData = window.dashboardData;
+            renderDashboard();
+        }
+
+
+        // ─── Render Dashboard ────────────────────────────────────
+        function renderDashboard() {
+            if (!dashboardData) return;
+
+            // Update header time
+            document.getElementById('updated-time').textContent = `更新時間：${dashboardData.updated_at}`;
+
+            // Render recommendations
+            renderRecommendations();
+
+            // Render charts
+            renderCharts();
+
+            // Render history
+            renderHistory();
+
+            // Render statistics
+            renderStatistics();
+        }
+
+        function renderRecommendations() {
+            const { short = [], long = [], disposal_alert = [] } = dashboardData.daily_recommendations;
+
+            // Short list
+            const shortHTML = short.length > 0
+                ? short.map((item, idx) => `
+                    <div class="recommendation-item short">
+                        <div class="recommendation-rank">${item.rank}</div>
+                        <div class="recommendation-header">
+                            <div class="recommendation-info">
+                                <h3>${item.code} ${item.name}</h3>
+                                <p>現價：NT$${item.price.toFixed(2)}</p>
+                            </div>
+                            <div class="recommendation-score short">評分 ${item.score}</div>
+                        </div>
+                        <div class="recommendation-price">做空理由</div>
+                        <div class="recommendation-reason">${item.reason}</div>
+                    </div>
+                `).join('')
+                : '<div class="empty-state"><p>今日無做空推薦</p></div>';
+
+            document.getElementById('short-list').innerHTML = shortHTML;
+
+            // Long list
+            const longHTML = long.length > 0
+                ? long.map((item, idx) => `
+                    <div class="recommendation-item long">
+                        <div class="recommendation-rank">${item.rank}</div>
+                        <div class="recommendation-header">
+                            <div class="recommendation-info">
+                                <h3>${item.code} ${item.name}</h3>
+                                <p>現價：NT$${item.price.toFixed(2)}</p>
+                            </div>
+                            <div class="recommendation-score long">評分 ${item.score}</div>
+                        </div>
+                        <div class="recommendation-price">做多理由</div>
+                        <div class="recommendation-reason">${item.reason}</div>
+                    </div>
+                `).join('')
+                : '<div class="empty-state"><p>今日無做多推薦</p></div>';
+
+            document.getElementById('long-list').innerHTML = longHTML;
+
+            // Alert list
+            const alertHTML = disposal_alert.length > 0
+                ? disposal_alert.map((item, idx) => `
+                    <div class="recommendation-item alert">
+                        <div class="recommendation-header">
+                            <div class="recommendation-info">
+                                <h3>${item.code} ${item.name}</h3>
+                                <p>狀態：${item.status}</p>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: var(--color-text-light);">
+                            <p>上門檻：NT$${item.upper_price.toFixed(2)}</p>
+                            <p>下門檻：NT$${item.lower_price.toFixed(2)}</p>
+                        </div>
+                    </div>
+                `).join('')
+                : '<div class="empty-state"><p>無處置預警</p></div>';
+
+            document.getElementById('alert-list').innerHTML = alertHTML;
+        }
+
+        function renderCharts() {
+            const container = document.getElementById('charts-container');
+            const { price_data = {} } = dashboardData;
+
+            if (Object.keys(price_data).length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>無可用的圖表資料</p></div>';
+                return;
+            }
+
+            const chartPromises = [];
+
+            Object.entries(price_data).forEach(([code, data]) => {
+                if (!data.closes || data.closes.length === 0) return;
+
+                const chartDiv = document.createElement('div');
+                chartDiv.innerHTML = `
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>${code}</h3>
+                            <span class="code">${data.closes[data.closes.length - 1].toFixed(2)}</span>
+                        </div>
+                        <div id="chart-${code}" class="chart"></div>
+                    </div>
+                `;
+                container.appendChild(chartDiv);
+
+                // Prepare chart data
+                const candleData = data.dates.map((date, idx) => ({
+                    x: new Date(date).getTime(),
+                    y: [data.opens?.[idx] || data.closes[idx], data.highs[idx], data.lows[idx], data.closes[idx]]
+                }));
+
+                // Prepare BB data (only last 20 points)
+                const bbStart = data.closes.length - (data.bollinger_bands?.sma?.length || 0);
+                const bbDates = data.dates.slice(bbStart);
+                const bbUpper = data.bollinger_bands?.upper || [];
+                const bbLower = data.bollinger_bands?.lower || [];
+                const bbSma = data.bollinger_bands?.sma || [];
+
+                const bbUpperData = bbDates.map((date, idx) => ({
+                    x: new Date(date).getTime(),
+                    y: bbUpper[idx]?.toFixed(2) || null
+                }));
+
+                const bbLowerData = bbDates.map((date, idx) => ({
+                    x: new Date(date).getTime(),
+                    y: bbLower[idx]?.toFixed(2) || null
+                }));
+
+                const bbSmaData = bbDates.map((date, idx) => ({
+                    x: new Date(date).getTime(),
+                    y: bbSma[idx]?.toFixed(2) || null
+                }));
+
+                const options = {
+                    chart: {
+                        type: 'candlestick',
+                        height: 350,
+                        toolbar: {
+                            show: false
+                        },
+                        zoom: {
+                            enabled: false
+                        }
+                    },
+                    series: [
+                        {
+                            name: 'K線',
+                            data: candleData
+                        },
+                        {
+                            name: '上軌',
+                            type: 'line',
+                            data: bbUpperData,
+                            stroke: { width: 2, dashArray: 4 },
+                            color: '#D97706'
+                        },
+                        {
+                            name: '20日均線',
+                            type: 'line',
+                            data: bbSmaData,
+                            stroke: { width: 2 },
+                            color: '#1A3A52'
+                        },
+                        {
+                            name: '下軌',
+                            type: 'line',
+                            data: bbLowerData,
+                            stroke: { width: 2, dashArray: 4 },
+                            color: '#8B1A1A'
+                        }
+                    ],
+                    xaxis: {
+                        type: 'datetime',
+                        labels: {
+                            format: 'MM/dd'
+                        }
+                    },
+                    yaxis: {
+                        labels: {
+                            formatter: function(val) {
+                                return val?.toFixed(2) || '';
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        candlestick: {
+                            colors: {
+                                upward: '#1A6B2A',
+                                downward: '#8B1A1A'
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                };
+
+                const chart = new ApexCharts(document.getElementById(`chart-${code}`), options);
+                chart.render();
+            });
+        }
+
+        function renderHistory() {
+            const { history = [] } = dashboardData;
+            const tbody = document.getElementById('history-tbody');
+
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暫無歷史記錄</td></tr>';
+                return;
+            }
+
+            const rows = history
+                .sort((a, b) => b.date.localeCompare(a.date))
+                .map(item => {
+                    const typeClass = item.type === 'short' ? 'type-short' : item.type === 'long' ? 'type-long' : 'type-disposal';
+                    const typeLabel = item.type === 'short' ? '做空' : item.type === 'long' ? '做多' : '處置';
+
+                    return `
+                        <tr>
+                            <td>${item.date}</td>
+                            <td><strong>${item.code}</strong></td>
+                            <td>${item.name}</td>
+                            <td><span class="${typeClass}">${typeLabel}</span></td>
+                            <td>${item.score}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+            tbody.innerHTML = rows;
+        }
+
+        function renderStatistics() {
+            const { daily_recommendations = {}, history = [], metadata = {} } = dashboardData;
+            const { short = [], long = [], disposal_alert = [] } = daily_recommendations;
+
+            const totalShort = history.filter(h => h.type === 'short').length;
+            const totalLong = history.filter(h => h.type === 'long').length;
+            const totalDisposal = history.filter(h => h.type === 'disposal').length;
+            const totalRecommendations = totalShort + totalLong;
+
+            const statsHTML = `
+                <div class="stat-box">
+                    <div class="stat-number">${short.length}</div>
+                    <div class="stat-label">今日做空推薦</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">${long.length}</div>
+                    <div class="stat-label">今日做多推薦</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">${totalShort}</div>
+                    <div class="stat-label">30天做空推薦</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">${totalLong}</div>
+                    <div class="stat-label">30天做多推薦</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">${totalRecommendations}</div>
+                    <div class="stat-label">總推薦次數</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">${totalDisposal}</div>
+                    <div class="stat-label">處置預警次數</div>
+                </div>
+            `;
+
+            document.getElementById('statistics-container').innerHTML = statsHTML;
+        }
+
+        // ─── Tab Navigation ──────────────────────────────────────
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const tabName = e.target.dataset.tab;
+
+                // Update active button
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+
+                // Update active content
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(tabName).classList.add('active');
+            });
+        });
+
+        // ─── Initialize ───────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', loadDashboardData);
+    </script>
+</body>
+</html>
