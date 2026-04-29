@@ -313,7 +313,7 @@
         }
     </style>
     <script>
-        // 儀表板資料已嵌入
+        // 儀表板資料已嵌入（由 html_generator.py 自動注入）
         window.dashboardData = {"date": "20260429", "updated_at": "2026-04-29 16:55:03", "daily_recommendations": {"short": [{"rank": 1, "code": "4973", "name": "廣穎", "score": 16, "price": 0.0, "reason": "周轉率31.2%(高)；主力賣-7.3%；主力持續賣(5日-5%/10日-1%)；乖離年線130%(高位)；當沖比24%；位階8(上軌附近)；乖離月線18.1%", "risk_score": 50, "risk_level": "medium", "advice": {"summary": "等待 K 線資料", "entry": 0, "stop_loss": 0, "target": 0}}, {"rank": 2, "code": "8027", "name": "鈦昇", "score": 14, "price": 0.0, "reason": "周轉率15.2%；主力持續賣(5日-1%/10日-3%)；乖離年線64%(高位)；當沖比113%(極強隔日沖)；位階10(上軌附近)", "risk_score": 50, "risk_level": "medium", "advice": {"summary": "等待 K 線資料", "entry": 0, "stop_loss": 0, "target": 0}}, {"rank": 3, "code": "4927", "name": "泰鼎-KY", "score": 14, "price": 0.0, "reason": "周轉率14.1%；主力賣-11.3%；乖離年線97%(高位)；當沖比62%(強隔日沖)；位階9(上軌附近)；乖離月線22.6%", "risk_score": 50, "risk_level": "medium", "advice": {"summary": "等待 K 線資料", "entry": 0, "stop_loss": 0, "target": 0}}], "long": [{"rank": 1, "code": "8103", "name": "瀚荃", "score": 16, "price": 0.0, "reason": "強勢回測+主力連買；強勢回測(位階13/斜率2.40)；高位回測；主力連買5天(5日7%/10日6%)；連買5天以上", "risk_score": 50, "risk_level": "medium", "advice": {"summary": "等待 K 線資料", "entry": 0, "stop_loss": 0, "target": 0}}, {"rank": 2, "code": "8027", "name": "鈦昇", "score": 10, "price": 0.0, "reason": "強勢回測；強勢回測(位階10/斜率1.08)；高位回測；當沖比113%", "risk_score": 50, "risk_level": "medium", "advice": {"summary": "等待 K 線資料", "entry": 0, "stop_loss": 0, "target": 0}}, {"rank": 3, "code": "1727", "name": "中華化", "score": 10, "price": 0.0, "reason": "強勢回測；強勢回測(位階10/斜率2.22)；高位回測；當沖比159%", "risk_score": 50, "risk_level": "medium", "advice": {"summary": "等待 K 線資料", "entry": 0, "stop_loss": 0, "target": 0}}], "disposal_alert": []}, "price_data": {}, "history": [], "metadata": {"bollinger_period": 20, "bollinger_std_dev": 2, "history_days": 30, "total_recommendations": 6, "total_history_records": 0}};
     </script>
 </head>
@@ -421,9 +421,21 @@
         });
     });
 
-    // ── 資料載入（html_generator.py 會替換這個函式）──────
-    function loadDashboardData() {
+    // ── 資料載入（html_generator.py 會在 <head> 注入 window.dashboardData）──────
+    async function loadDashboardData() {
+        // 優先使用嵌入資料（由 html_generator.py 注入）
+        if (window.dashboardData) {
             dashboardData = window.dashboardData;
+            renderDashboard();
+            return;
+        }
+        // Fallback：嘗試從 URL 參數 fetch
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataUrl = urlParams.get('data') || 'dashboard_data.json';
+            const res = await fetch(dataUrl);
+            if (!res.ok) throw new Error('無法加載資料');
+            dashboardData = await res.json();
             renderDashboard();
         } catch(e) {
             document.body.innerHTML = `<div style="padding:40px;text-align:center;color:#718096">
