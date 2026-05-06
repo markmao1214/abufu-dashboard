@@ -523,17 +523,17 @@ body {
         const bb = data.bollinger_bands;
         if (bb?.sma?.length) {
             const offset = data.dates.length - bb.sma.length;
-            const mkLine = (arr, name) => ({
-                name, type: 'line',
+            const mkLine = (arr, name, color) => ({
+                name, type: 'line', color,
                 data: data.dates.map((d, i) => {
                     const ai = i - offset;
                     return (ai >= 0 && arr[ai] != null)
                         ? { x: new Date(d).getTime(), y: arr[ai] } : null;
                 }).filter(Boolean)
             });
-            series.push(mkLine(bb.sma,   '20日均線'));
-            series.push(mkLine(bb.upper, '布林上軌'));
-            series.push(mkLine(bb.lower, '布林下軌'));
+            series.push(mkLine(bb.sma,   '20日均線', '#F0B429'));
+            series.push(mkLine(bb.upper, '布林上軌', '#ffffff'));
+            series.push(mkLine(bb.lower, '布林下軌', '#ffffff'));
         }
 
         // annotations
@@ -584,8 +584,9 @@ body {
             theme:{ mode:'dark' },
             series,
             annotations,
-            colors:['#00BFFF','#F0B429','#FFFFFF','#FFFFFF'],
+            colors:['#00BFFF','#F0B429','#ffffff','#ffffff'],
             stroke:{ width:[1,2,2,2], dashArray:[0,0,0,0], curve:'smooth' },
+            fill:{ type:'solid', opacity:[1,1,1,1] },
             xaxis:{
                 type:'datetime',
                 labels:{ style:{ colors:'#5A7A94', fontSize:'11px' } },
