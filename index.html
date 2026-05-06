@@ -366,7 +366,7 @@ body {
     <div class="chart-legend" id="chart-legend" style="display:none">
       <div class="leg-item"><div class="leg-line" style="background:#F0B429"></div>20日均線</div>
       <div class="leg-item"><div class="leg-line" style="background:#FFFFFF"></div>布林上/下軌</div>
-      <div class="leg-item"><div class="leg-dash" style="border-color:#FF4560"></div>阻力</div>
+      <div class="leg-item"><div class="leg-dash" style="border-color:#FF8C00"></div>阻力</div>
       <div class="leg-item"><div class="leg-dash" style="border-color:#00D97A"></div>支撐</div>
     </div>
 
@@ -590,10 +590,10 @@ body {
         const adv = item?.advice || {};
 
         if (adv.resistance > 0) annotations.yaxis.push({
-            y: adv.resistance, borderColor:'#FF4560', borderWidth:1,
+            y: adv.resistance, borderColor:'#FF8C00', borderWidth:1,
             strokeDashArray:5, opacity:0.8,
             label:{ text:`阻力 ${adv.resistance}`, position:'left',
-                style:{ background:'rgba(255,69,96,0.15)', color:'#FF4560',
+                style:{ background:'rgba(255,140,0,0.18)', color:'#FF8C00',
                     fontSize:'12px', fontWeight:700,
                     padding:{left:6,right:6,top:3,bottom:3} } }
         });
