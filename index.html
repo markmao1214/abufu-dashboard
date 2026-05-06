@@ -186,11 +186,13 @@ body {
 .ci-code  { font-size: 15px; color: var(--text-dim); margin-top: 2px; }
 .ci-right { display: flex; gap: 22px; align-items: center; flex-shrink: 0; }
 .ci-stat  { text-align: center; }
-.ci-stat-label { font-size: 18px; font-weight: 800; }
-.ci-stat-value { font-size: 24px; font-weight: 800; font-family: 'SF Mono',monospace; margin-top: 1px; }
+.ci-stat-label { font-size: 18px; font-weight: 800; color: #FFFFFF; }
+.ci-stat-value { font-size: 24px; font-weight: 800; font-family: 'SF Mono',monospace; margin-top: 1px; color: #FFFFFF; }
 .cv-short { color: var(--short); }
 .cv-long  { color: var(--long);  }
 .cv-loss  { color: #FF6B6B; }
+.cv-up    { color: #FF4560; }   /* 紅K = 漲 */
+.cv-down  { color: #00D97A; }   /* 黑K = 跌 */
 
 /* ── Chart Legend ────────────────────────────── */
 .chart-legend {
@@ -342,15 +344,15 @@ body {
           <div class="ci-stat-value" id="ci-entry">—</div>
         </div>
         <div class="ci-stat">
-          <div class="ci-stat-label" style="color:#FF6B6B">損</div>
-          <div class="ci-stat-value cv-loss" id="ci-stop">—</div>
+          <div class="ci-stat-label">損</div>
+          <div class="ci-stat-value" id="ci-stop">—</div>
         </div>
       </div>
     </div>
 
     <div class="chart-legend" id="chart-legend" style="display:none">
       <div class="leg-item"><div class="leg-line" style="background:#F0B429"></div>20日均線</div>
-      <div class="leg-item"><div class="leg-line" style="background:#29B6F6"></div>布林上/下軌</div>
+      <div class="leg-item"><div class="leg-line" style="background:#FFFFFF"></div>布林上/下軌</div>
       <div class="leg-item"><div class="leg-dash" style="border-color:#FF4560"></div>阻力</div>
       <div class="leg-item"><div class="leg-dash" style="border-color:#00D97A"></div>支撐</div>
     </div>
@@ -464,19 +466,25 @@ body {
             const p = item.price;
             const priceEl = document.getElementById('ci-price');
             priceEl.textContent = p > 0 ? Number(p).toLocaleString() : 'N/A';
-            priceEl.className = 'ci-price ' + (type === 'short' ? 'cv-short' : 'cv-long');
+
+            // 股價顏色：依最新 K 線紅K/黑K 決定（紅=漲=紅色，黑=跌=綠色）
+            const pdata = dashboardData.price_data?.[code];
+            let priceColor = 'cv-up'; // 預設紅
+            if (pdata?.closes?.length >= 2) {
+                const last = pdata.closes[pdata.closes.length - 1];
+                const prev = pdata.closes[pdata.closes.length - 2];
+                priceColor = last >= prev ? 'cv-up' : 'cv-down';
+            } else if (pdata?.opens?.length) {
+                const last  = pdata.closes[pdata.closes.length - 1];
+                const open  = pdata.opens[pdata.opens.length - 1];
+                priceColor = last >= open ? 'cv-up' : 'cv-down';
+            }
+            priceEl.className = 'ci-price ' + priceColor;
 
             const adv = item.advice || {};
-            const typeLabel = document.getElementById('ci-type-label');
-            typeLabel.textContent = type === 'short' ? '空' : '多';
-            typeLabel.className = 'ci-stat-label ' + (type === 'short' ? 'cv-short' : 'cv-long');
-
-            const entryEl = document.getElementById('ci-entry');
-            entryEl.textContent = adv.entry > 0 ? adv.entry : (p || '—');
-            entryEl.className = 'ci-stat-value ' + (type === 'short' ? 'cv-short' : 'cv-long');
-
-            document.getElementById('ci-stop').textContent =
-                adv.stop_loss > 0 ? adv.stop_loss : '—';
+            document.getElementById('ci-type-label').textContent = type === 'short' ? '空' : '多';
+            document.getElementById('ci-entry').textContent = adv.entry > 0 ? adv.entry : (p || '—');
+            document.getElementById('ci-stop').textContent  = adv.stop_loss > 0 ? adv.stop_loss : '—';
         } else {
             infoEl.style.display = 'none';
         }
@@ -573,8 +581,8 @@ body {
             theme:{ mode:'dark' },
             series,
             annotations,
-            colors:['#00BFFF','#F0B429','#29B6F6','#29B6F6'],
-            stroke:{ width:[1,2,2.5,2.5], dashArray:[0,0,0,0], curve:'smooth' },
+            colors:['#00BFFF','#F0B429','#FFFFFF','#FFFFFF'],
+            stroke:{ width:[1,2,2,2], dashArray:[0,0,0,0], curve:'smooth' },
             xaxis:{
                 type:'datetime',
                 labels:{ style:{ colors:'#5A7A94', fontSize:'11px' } },
