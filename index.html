@@ -815,18 +815,42 @@ body {
         }
 
         const cats = {
-            '已處置':          [],
-            '注意中→即將處置': [],
+            '注意處置預警':    [],
+            '注意處置中':      [],
             '必中（今日達標）': [],
             '連N／接近門檻':   [],
         };
         disposal.forEach(a => {
             const s = a.status || '';
-            if      (s.includes('已處置') || s.includes('處置中'))      cats['已處置'].push(a);
-            else if (s.includes('即將處置') || s.includes('注意中'))    cats['注意中→即將處置'].push(a);
+            if      (s.includes('即將處置') || s.includes('注意中'))    cats['注意處置預警'].push(a);
+            else if (s.includes('已處置') || s.includes('處置中'))      cats['注意處置中'].push(a);
             else if (s.includes('必中') || s.includes('今日達標'))      cats['必中（今日達標）'].push(a);
             else                                                          cats['連N／接近門檻'].push(a);
         });
+
+        // 處置反彈候選（做多）
+        const bounce = dashboardData.daily_recommendations.bounce_candidates ?? [];
+        let bounceHtml = '';
+        if (bounce.length) {
+            bounceHtml = `<div class="alert-cat-title">
+                <span class="section-bar" style="background:var(--short)"></span>
+                處置中 → 反彈候選（做多）</div>`;
+            bounce.forEach(b => {
+                bounceHtml += `<div class="alert-card" style="border-left:3px solid var(--short);border-color:rgba(0,217,122,0.3)">
+                    <div>
+                        <div class="alert-name" style="color:var(--short)">${b.code} ${b.name}</div>
+                        <div class="alert-prices">
+                            現價 ${b.current_price} ／ 跌幅 ${b.drop_pct}%
+                            ／ 月線 ${b.ma20} ／ 斜率 ${b.ma_slope}
+                        </div>
+                        <div class="alert-prices" style="margin-top:2px;color:var(--text-dim)">${b.detail}</div>
+                    </div>
+                    <div class="alert-badge" style="background:rgba(0,217,122,0.12);border-color:rgba(0,217,122,0.4);color:var(--short)">
+                        做多候選
+                    </div>
+                </div>`;
+            });
+        }
 
         let html = '';
         for (const [cat, items] of Object.entries(cats)) {
@@ -846,7 +870,7 @@ body {
                 </div>`;
             });
         }
-        document.getElementById('alert-section').innerHTML = html;
+        document.getElementById('alert-section').innerHTML = bounceHtml + html;
     }
 
     loadDashboardData();
