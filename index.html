@@ -808,12 +808,46 @@ body {
     // ── 注意處置 Tab
     function renderAlerts() {
         const disposal = dashboardData.daily_recommendations.disposal_alert ?? [];
-        if (!disposal.length) {
+        const bounce   = dashboardData.daily_recommendations.bounce_candidates ?? [];
+
+        // 兩個都空才顯示「無資料」
+        if (!disposal.length && !bounce.length) {
             document.getElementById('alert-section').innerHTML =
                 '<div class="empty">目前無注意處置標的</div>';
             return;
         }
 
+        // ── 反彈候選（最上方，綠色）──────────────────────────
+        let bounceHtml = '';
+        if (bounce.length) {
+            bounceHtml = `<div class="alert-cat-title">
+                <span class="section-bar" style="background:var(--short)"></span>
+                處置中 → 反彈候選（做多）</div>`;
+            bounce.forEach(b => {
+                // 安全顯示數字（防 0 / NaN）
+                const price   = (b.current_price > 0) ? b.current_price : '—';
+                const dropPct = (typeof b.drop_pct === 'number') ? b.drop_pct.toFixed(1) + '%' : '—';
+                const ma20    = (b.ma20 > 0) ? b.ma20 : '—';
+                const slope   = (typeof b.ma_slope === 'number') ? b.ma_slope.toFixed(3) : '—';
+                const detail  = b.detail || '';
+
+                bounceHtml += `<div class="alert-card" style="border-left:3px solid var(--short);border-color:rgba(0,217,122,0.3)">
+                    <div>
+                        <div class="alert-name" style="color:var(--short)">${b.code} ${b.name}</div>
+                        <div class="alert-prices">
+                            現價 ${price} ／ 跌幅 ${dropPct}
+                            ／ 月線 ${ma20} ／ 斜率 ${slope}
+                        </div>
+                        ${detail ? `<div class="alert-prices" style="margin-top:2px;color:var(--text-dim)">${detail}</div>` : ''}
+                    </div>
+                    <div class="alert-badge" style="background:rgba(0,217,122,0.12);border-color:rgba(0,217,122,0.4);color:var(--short)">
+                        做多候選
+                    </div>
+                </div>`;
+            });
+        }
+
+        // ── 注意處置預警（分類）────────────────────────────────
         const cats = {
             '注意處置預警':    [],
             '注意處置中':      [],
@@ -823,34 +857,10 @@ body {
         disposal.forEach(a => {
             const s = a.status || '';
             if      (s.includes('即將處置') || s.includes('注意中'))    cats['注意處置預警'].push(a);
-            else if (s.includes('已處置') || s.includes('處置中'))      cats['注意處置中'].push(a);
-            else if (s.includes('必中') || s.includes('今日達標'))      cats['必中（今日達標）'].push(a);
+            else if (s.includes('已處置')   || s.includes('處置中'))    cats['注意處置中'].push(a);
+            else if (s.includes('必中')     || s.includes('今日達標'))  cats['必中（今日達標）'].push(a);
             else                                                          cats['連N／接近門檻'].push(a);
         });
-
-        // 處置反彈候選（做多）
-        const bounce = dashboardData.daily_recommendations.bounce_candidates ?? [];
-        let bounceHtml = '';
-        if (bounce.length) {
-            bounceHtml = `<div class="alert-cat-title">
-                <span class="section-bar" style="background:var(--short)"></span>
-                處置中 → 反彈候選（做多）</div>`;
-            bounce.forEach(b => {
-                bounceHtml += `<div class="alert-card" style="border-left:3px solid var(--short);border-color:rgba(0,217,122,0.3)">
-                    <div>
-                        <div class="alert-name" style="color:var(--short)">${b.code} ${b.name}</div>
-                        <div class="alert-prices">
-                            現價 ${b.current_price} ／ 跌幅 ${b.drop_pct}%
-                            ／ 月線 ${b.ma20} ／ 斜率 ${b.ma_slope}
-                        </div>
-                        <div class="alert-prices" style="margin-top:2px;color:var(--text-dim)">${b.detail}</div>
-                    </div>
-                    <div class="alert-badge" style="background:rgba(0,217,122,0.12);border-color:rgba(0,217,122,0.4);color:var(--short)">
-                        做多候選
-                    </div>
-                </div>`;
-            });
-        }
 
         let html = '';
         for (const [cat, items] of Object.entries(cats)) {
@@ -858,12 +868,13 @@ body {
             html += `<div class="alert-cat-title">
                 <span class="section-bar bar-gold"></span>${cat}</div>`;
             items.forEach(a => {
+                const up  = (a.upper_price > 0) ? a.upper_price.toFixed(2) : '—';
+                const dn  = (a.lower_price > 0) ? a.lower_price.toFixed(2) : '—';
                 html += `<div class="alert-card">
                     <div>
                         <div class="alert-name">${a.code} ${a.name}</div>
                         <div class="alert-prices">
-                            漲停門檻：${a.upper_price?.toFixed(2)??'—'} ／
-                            跌停門檻：${a.lower_price?.toFixed(2)??'—'}
+                            漲停門檻：${up} ／ 跌停門檻：${dn}
                         </div>
                     </div>
                     <div class="alert-badge">${a.status}</div>
