@@ -617,9 +617,11 @@ body {
 
         const volData = data.dates.map((d, i) =>
             ({ x: new Date(d).getTime(), y: data.volumes[i] }));
-        const colors = data.dates.map((_, i) =>
-            i === 0 ? '#5A7A94'
-            : data.closes[i] >= data.closes[i-1] ? '#FF4560' : '#00D97A');
+        const colors = data.dates.map((_, i) => {
+            const c = data.closes[i];
+            const o = data.opens?.[i] ?? data.closes[i];
+            return c >= o ? '#FF4560' : '#00D97A';  // 紅K=紅, 黑K=綠
+        });
 
         const opts = {
             chart:{
