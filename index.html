@@ -221,6 +221,12 @@ body {
 #main-chart:empty {
   min-height: 300px;
 }
+/* 工具列移到日期軸下方 */
+#main-chart .apexcharts-toolbar {
+  top: auto !important;
+  bottom: -32px !important;
+  right: 6px !important;
+}
 #volume-chart {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -543,7 +549,7 @@ body {
         if (adv.resistance > 0) annotations.yaxis.push({
             y: adv.resistance, borderColor:'#FF4560', borderWidth:1,
             strokeDashArray:5, opacity:0.8,
-            label:{ text:`阻力 ${adv.resistance}`, position:'right',
+            label:{ text:`阻力 ${adv.resistance}`, position:'left',
                 style:{ background:'rgba(255,69,96,0.15)', color:'#FF4560',
                     fontSize:'12px', fontWeight:700,
                     padding:{left:6,right:6,top:3,bottom:3} } }
@@ -551,7 +557,7 @@ body {
         if (adv.support > 0) annotations.yaxis.push({
             y: adv.support, borderColor:'#00D97A', borderWidth:1,
             strokeDashArray:5, opacity:0.8,
-            label:{ text:`支撐 ${adv.support}`, position:'right',
+            label:{ text:`支撐 ${adv.support}`, position:'left',
                 style:{ background:'rgba(0,217,122,0.15)', color:'#00D97A',
                     fontSize:'12px', fontWeight:700,
                     padding:{left:6,right:6,top:3,bottom:3} } }
