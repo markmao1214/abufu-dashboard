@@ -11,8 +11,8 @@ html, body { height: 100%; background: #080C10; }
 body {
   color: #C8D8E8;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.4;
+  font-size: 16px;
+  line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -21,10 +21,10 @@ body {
   --surface:  #0F1520;
   --surface2: #141E2D;
   --border:   #1C2B3A;
-  --short:    #FF4560;
-  --short-bg: rgba(255,69,96,0.12);
-  --long:     #00D97A;
-  --long-bg:  rgba(0,217,122,0.12);
+  --short:    #00D97A;           /* 空方 = 綠（跌色） */
+  --short-bg: rgba(0,217,122,0.12);
+  --long:     #FF4560;           /* 多方 = 紅（漲色） */
+  --long-bg:  rgba(255,69,96,0.12);
   --gold:     #F0B429;
   --gold-bg:  rgba(240,180,41,0.12);
   --text:     #C8D8E8;
@@ -40,13 +40,13 @@ body {
   text-align: center;
 }
 .header-title {
-  font-size: 19px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--text-bright);
   letter-spacing: 1px;
 }
 .header-sub {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   margin-top: 3px;
 }
@@ -55,8 +55,8 @@ body {
   background: rgba(240,180,41,0.1);
   border: 1px solid rgba(240,180,41,0.35);
   border-radius: 4px;
-  padding: 2px 12px;
-  font-size: 12px;
+  padding: 3px 14px;
+  font-size: 14px;
   color: var(--gold);
   margin-top: 6px;
   font-weight: 600;
@@ -74,11 +74,11 @@ body {
 }
 .tab-btn {
   flex: 1;
-  padding: 11px 0;
+  padding: 13px 0;
   background: none;
   border: none;
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   border-bottom: 2px solid transparent;
@@ -92,15 +92,15 @@ body {
 /* ── Section ─────────────────────────────────── */
 .section { padding: 12px 12px 0; }
 .section-title {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-dim);
-  letter-spacing: 1.8px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   display: flex;
   align-items: center;
   gap: 7px;
-  margin-bottom: 9px;
+  margin-bottom: 10px;
 }
 .section-bar {
   display: inline-block;
@@ -161,7 +161,7 @@ body {
   font-weight: 600;
 }
 .rec-rank {
-  font-size: 30px;
+  font-size: 34px;
   font-weight: 900;
   line-height: 1;
   margin-bottom: 4px;
@@ -169,23 +169,23 @@ body {
 .rec-card.short .rec-rank { color: var(--short); }
 .rec-card.long  .rec-rank { color: var(--long);  }
 
-.rec-name { font-size: 17px; font-weight: 700; color: var(--text-bright); }
-.rec-code { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+.rec-name { font-size: 19px; font-weight: 700; color: var(--text-bright); }
+.rec-code { font-size: 13px; color: var(--text-dim); margin-bottom: 9px; }
 
 .rec-price {
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 700;
   font-family: 'SF Mono', 'Menlo', monospace;
   margin-bottom: 5px;
 }
-.c-up   { color: var(--short); }  /* 台股：漲 = 紅 */
-.c-down { color: var(--long);  }
+.c-up   { color: #FF4560; }  /* 台股：漲 = 紅 */
+.c-down { color: #00D97A; }  /* 台股：跌 = 綠 */
 .c-flat { color: var(--text);  }
 
-.rec-stars { font-size: 14px; letter-spacing: 2px; }
+.rec-stars { font-size: 16px; letter-spacing: 2px; }
 .s-on  { color: var(--gold); }
 .s-off { color: #1E2D3D; }
-.rec-risk-lbl { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+.rec-risk-lbl { font-size: 13px; color: var(--text-dim); margin-top: 3px; }
 
 /* ── Alert ───────────────────────────────────── */
 .alert-wrap { padding: 0 12px; }
@@ -201,8 +201,8 @@ body {
   align-items: center;
   gap: 8px;
 }
-.alert-name { font-size: 14px; font-weight: 600; color: var(--text-bright); }
-.alert-prices { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.alert-name { font-size: 16px; font-weight: 600; color: var(--text-bright); }
+.alert-prices { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
 .alert-badge {
   flex: 0 0 auto;
   font-size: 10px;
@@ -226,11 +226,26 @@ body {
   scrollbar-width: none;
 }
 .stock-tabs::-webkit-scrollbar { display: none; }
+.stock-type-label {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+.stock-type-label.lbl-short { color: var(--short); }
+.stock-type-label.lbl-long  { color: var(--long);  }
+
 .stock-tab {
   flex: 0 0 auto;
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: 5px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   border: 1px solid var(--border);
@@ -251,16 +266,16 @@ body {
   align-items: flex-end;
   padding: 8px 0 6px;
 }
-.ci-name { font-size: 20px; font-weight: 700; color: var(--text-bright); }
-.ci-code { font-size: 12px; color: var(--text-dim); }
+.ci-name { font-size: 22px; font-weight: 700; color: var(--text-bright); }
+.ci-code { font-size: 14px; color: var(--text-dim); }
 .ci-price {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   font-family: 'SF Mono', monospace;
   text-align: right;
 }
-.ci-change { font-size: 11px; text-align: right; margin-top: 1px; }
-.ci-vol    { font-size: 10px; color: var(--text-dim); text-align: right; }
+.ci-change { font-size: 13px; text-align: right; margin-top: 1px; }
+.ci-vol    { font-size: 12px; color: var(--text-dim); text-align: right; }
 
 /* ── Chart Legend ────────────────────────────── */
 .chart-legend {
@@ -357,7 +372,7 @@ body {
 
 /* ── History ─────────────────────────────────── */
 .hist-wrap { overflow-x: auto; padding: 12px; }
-.hist-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.hist-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .hist-table th {
   background: var(--surface2);
   color: var(--text-dim);
@@ -592,15 +607,24 @@ body {
     // ── 股票選擇器
     function buildStockSelector() {
         const { short=[], long=[] } = dashboardData.daily_recommendations;
-        const codes = [
-            ...short.map(r=>({code:r.code,name:r.name,type:'short'})),
-            ...long.map(r=>({code:r.code,name:r.name,type:'long'}))
-        ];
-        document.getElementById('stock-selector').innerHTML = codes.map(c=>`
-            <div class="stock-tab ${c.type}-type" onclick="showChart('${c.code}')" data-code="${c.code}">
-                ${c.code} ${c.name}
-            </div>`).join('');
-        if (codes.length > 0) showChart(codes[0].code);
+        let html = '';
+        if (short.length) {
+            html += '<span class="stock-type-label lbl-short">空方</span>';
+            html += short.map(r=>`
+                <div class="stock-tab short-type" onclick="showChart('${r.code}')" data-code="${r.code}">
+                    ${r.code} ${r.name}
+                </div>`).join('');
+        }
+        if (long.length) {
+            html += '<span class="stock-type-label lbl-long">多方</span>';
+            html += long.map(r=>`
+                <div class="stock-tab long-type" onclick="showChart('${r.code}')" data-code="${r.code}">
+                    ${r.code} ${r.name}
+                </div>`).join('');
+        }
+        document.getElementById('stock-selector').innerHTML = html;
+        const first = short[0] || long[0];
+        if (first) showChart(first.code);
     }
 
     // ── 顯示圖表
