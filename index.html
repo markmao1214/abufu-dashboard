@@ -194,6 +194,51 @@ body {
 .cv-up    { color: #FF4560; }   /* 紅K = 漲 */
 .cv-down  { color: #00D97A; }   /* 黑K = 跌 */
 
+/* ── Analysis Row（籌碼 + 主力警示）─────────── */
+.analysis-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.analysis-card {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  min-width: 0;
+}
+.analysis-card.chip-card  { border-left: 3px solid var(--gold); }
+.analysis-card.warn-card  { border-left: 3px solid #C084FC; text-align: center; }
+.ac-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.chip-bullet {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.75;
+}
+.chip-bullet::before { content: '★ '; color: var(--gold); font-size: 11px; }
+.star-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 6px 0 6px;
+}
+.star-on  { color: #F0B429; font-size: 26px; }
+.star-off { color: #2A3A4A; font-size: 26px; }
+.warn-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: #C084FC;
+  letter-spacing: 1px;
+}
+
 /* ── Chart Legend ────────────────────────────── */
 .chart-legend {
   display: flex;
@@ -363,6 +408,19 @@ body {
       </div>
     </div>
 
+    <!-- 籌碼分析 + 主力警示 -->
+    <div class="analysis-row" id="analysis-row" style="display:none">
+      <div class="analysis-card chip-card">
+        <div class="ac-title">籌碼分析</div>
+        <div id="chip-content"></div>
+      </div>
+      <div class="analysis-card warn-card">
+        <div class="ac-title" id="warn-title">主力出貨警示</div>
+        <div class="star-row" id="star-row"></div>
+        <div class="warn-label" id="warn-label"></div>
+      </div>
+    </div>
+
     <div class="chart-legend" id="chart-legend" style="display:none">
       <div class="leg-item"><div class="leg-line" style="background:#F0B429"></div>20日均線</div>
       <div class="leg-item"><div class="leg-line" style="background:#FFFFFF"></div>布林上/下軌</div>
@@ -501,9 +559,35 @@ body {
             document.getElementById('ci-type-label').textContent = type === 'short' ? '空' : '多';
             document.getElementById('ci-entry').textContent = adv.entry > 0 ? adv.entry : (p || '—');
             document.getElementById('ci-stop').textContent  = adv.stop_loss > 0 ? adv.stop_loss : '—';
+
+            // ── 籌碼分析 + 主力警示 ──────────────────────────────
+            const analysisRow = document.getElementById('analysis-row');
+            const reason = item.reason || '';
+            const score  = item.score  || 0;
+
+            // 籌碼分析：把 reason 依 ；; 分成多行
+            const bullets = reason.split(/[；;]/).map(s => s.trim()).filter(Boolean);
+            document.getElementById('chip-content').innerHTML =
+                bullets.map(b => `<div class="chip-bullet">${b}</div>`).join('') ||
+                '<div class="chip-bullet" style="color:var(--text-dim)">—</div>';
+
+            // 主力警示：score → 星數
+            const stars = score >= 16 ? 5 : score >= 13 ? 4 : score >= 10 ? 3 : score >= 7 ? 2 : 1;
+            const WARN_LABELS_SHORT = ['持續追蹤','輕度觀察','中度觀察','高度警示','強烈警示'];
+            const WARN_LABELS_LONG  = ['觀察等待','輕度看多','中度看多','積極看多','強力做多'];
+            const labels = type === 'short' ? WARN_LABELS_SHORT : WARN_LABELS_LONG;
+            document.getElementById('warn-title').textContent =
+                type === 'short' ? '主力出貨警示' : '主力進場信號';
+            document.getElementById('star-row').innerHTML =
+                Array.from({length:5}, (_,i) =>
+                    `<span class="${i < stars ? 'star-on' : 'star-off'}">★</span>`
+                ).join('');
+            document.getElementById('warn-label').textContent = labels[stars - 1];
+            analysisRow.style.display = 'flex';
         } else {
             infoEl.style.display = 'none';
             drawKBarSvg(null);
+            document.getElementById('analysis-row').style.display = 'none';
         }
 
         const data = dashboardData.price_data?.[code];
