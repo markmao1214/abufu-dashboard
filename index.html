@@ -124,11 +124,11 @@ body {
 .rec-scroll::-webkit-scrollbar { display: none; }
 
 .rec-card {
-  flex: 0 0 155px;
+  flex: 0 0 170px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 9px;
-  padding: 11px 10px 9px;
+  padding: 12px 11px 10px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -161,31 +161,31 @@ body {
   font-weight: 600;
 }
 .rec-rank {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 900;
   line-height: 1;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 .rec-card.short .rec-rank { color: var(--short); }
 .rec-card.long  .rec-rank { color: var(--long);  }
 
-.rec-name { font-size: 15px; font-weight: 700; color: var(--text-bright); }
-.rec-code { font-size: 11px; color: var(--text-dim); margin-bottom: 7px; }
+.rec-name { font-size: 17px; font-weight: 700; color: var(--text-bright); }
+.rec-code { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
 
 .rec-price {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   font-family: 'SF Mono', 'Menlo', monospace;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 .c-up   { color: var(--short); }  /* 台股：漲 = 紅 */
 .c-down { color: var(--long);  }
 .c-flat { color: var(--text);  }
 
-.rec-stars { font-size: 12px; letter-spacing: 1px; }
+.rec-stars { font-size: 14px; letter-spacing: 2px; }
 .s-on  { color: var(--gold); }
 .s-off { color: #1E2D3D; }
-.rec-risk-lbl { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.rec-risk-lbl { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
 
 /* ── Alert ───────────────────────────────────── */
 .alert-wrap { padding: 0 12px; }
@@ -413,23 +413,8 @@ body {
 <!-- ══ 今日推薦 ══ -->
 <div id="daily" class="tab-content active">
 
-  <div class="section" style="margin-top:12px">
-    <div class="section-title"><span class="section-bar bar-short"></span>空方推薦 Top 3</div>
-    <div class="rec-scroll" id="short-list"><div class="empty"><div class="spinner"></div></div></div>
-  </div>
-
-  <div class="section">
-    <div class="section-title"><span class="section-bar bar-long"></span>多方推薦 Top 3</div>
-    <div class="rec-scroll" id="long-list"><div class="empty"><div class="spinner"></div></div></div>
-  </div>
-
-  <div class="section">
-    <div class="section-title"><span class="section-bar bar-gold"></span>注意處置預警</div>
-  </div>
-  <div class="alert-wrap" id="alert-list"><div class="empty">無預警</div></div>
-
-  <!-- 技術圖表 -->
-  <div class="chart-section">
+  <!-- 技術圖表（置頂）-->
+  <div class="chart-section" style="margin-top:12px">
     <div class="section-title"><span class="section-bar bar-gold"></span>技術圖表</div>
     <div class="stock-tabs" id="stock-selector"></div>
     <div id="chart-info" style="display:none" class="chart-info">
@@ -464,6 +449,22 @@ body {
       </div>
     </div>
   </div>
+
+  <!-- 推薦卡片（圖表下方）-->
+  <div class="section" style="margin-top:14px">
+    <div class="section-title"><span class="section-bar bar-short"></span>空方推薦 Top 3</div>
+    <div class="rec-scroll" id="short-list"><div class="empty"><div class="spinner"></div></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="section-bar bar-long"></span>多方推薦 Top 3</div>
+    <div class="rec-scroll" id="long-list"><div class="empty"><div class="spinner"></div></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="section-bar bar-gold"></span>注意處置預警</div>
+  </div>
+  <div class="alert-wrap" id="alert-list"><div class="empty">無預警</div></div>
 
 </div>
 
@@ -557,7 +558,7 @@ body {
     }
 
     function recCard(item, type) {
-        const price = item.price > 0 ? `NT$${Number(item.price).toLocaleString()}` : 'N/A';
+        const price = item.price > 0 ? `${Number(item.price).toLocaleString()}` : 'N/A';
         const priceClass = item.price > 0 ? (type==='short' ? 'c-up' : 'c-down') : 'c-flat';
         const score = item.risk_score ?? 50;
         const [lbl] = starInfo(score);
@@ -581,7 +582,7 @@ body {
               <div class="alert-item">
                 <div>
                   <div class="alert-name">${a.code} ${a.name}</div>
-                  <div class="alert-prices">漲停門檻：NT$${a.upper_price?.toFixed(2)??'—'} ／ 跌停門檻：NT$${a.lower_price?.toFixed(2)??'—'}</div>
+                  <div class="alert-prices">漲停門檻：${a.upper_price?.toFixed(2)??'—'} ／ 跌停門檻：${a.lower_price?.toFixed(2)??'—'}</div>
                 </div>
                 <div class="alert-badge">${a.status}</div>
               </div>`).join('')
@@ -623,7 +624,7 @@ body {
             document.getElementById('ci-name').textContent  = currentItem.name;
             document.getElementById('ci-code').textContent  = currentItem.code;
             const p = currentItem.price;
-            document.getElementById('ci-price').textContent = p > 0 ? `NT$${Number(p).toLocaleString()}` : 'N/A';
+            document.getElementById('ci-price').textContent = p > 0 ? `${Number(p).toLocaleString()}` : 'N/A';
             document.getElementById('ci-price').className   = 'ci-price ' + (p>0?(currentItem.type==='short'?'c-up':'c-down'):'c-flat');
             document.getElementById('ci-change').textContent = '';
             document.getElementById('ci-vol').textContent    = '';
@@ -661,9 +662,14 @@ body {
 
         const bb = data.bollinger_bands;
         if (bb?.sma?.length) {
+            // BB 資料對應最後 N 個交易日，需計算 offset 對齊日期
+            const offset = data.dates.length - bb.sma.length;
             const mkLine = (arr, name) => ({
                 name, type: 'line',
-                data: data.dates.map((d,i) => arr[i]!=null ? {x:new Date(d).getTime(),y:arr[i]} : null).filter(Boolean)
+                data: data.dates.map((d,i) => {
+                    const ai = i - offset;
+                    return (ai >= 0 && arr[ai] != null) ? {x: new Date(d).getTime(), y: arr[ai]} : null;
+                }).filter(Boolean)
             });
             series.push(mkLine(bb.sma,   '20日均線'));
             series.push(mkLine(bb.upper, '布林上軌'));
@@ -714,8 +720,8 @@ body {
             theme: { mode: 'dark' },
             series,
             annotations,
-            colors: ['#F0B429','#FF4560','#00D97A'],
-            stroke: { width:[1,1.5,1,1], dashArray:[0,0,4,4], curve:'smooth' },
+            colors: ['#00BFFF','#F0B429','#FF4560','#00D97A'],
+            stroke: { width:[1,1.5,1.5,1.5], dashArray:[0,0,3,3], curve:'smooth' },
             xaxis: {
                 type: 'datetime',
                 labels: { style: { colors:'#5A7A94', fontSize:'10px' } },
