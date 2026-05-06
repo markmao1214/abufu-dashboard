@@ -11,8 +11,8 @@ html, body { height: 100%; background: #080C10; }
 body {
   color: #C8D8E8;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.45;
+  font-size: 18px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -40,25 +40,25 @@ body {
   text-align: center;
 }
 .header-title {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--text-bright);
   letter-spacing: 1px;
 }
 .header-sub {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-dim);
-  margin-top: 3px;
+  margin-top: 4px;
 }
 .header-date {
   display: inline-block;
   background: rgba(240,180,41,0.1);
   border: 1px solid rgba(240,180,41,0.35);
   border-radius: 4px;
-  padding: 3px 14px;
-  font-size: 14px;
+  padding: 4px 16px;
+  font-size: 16px;
   color: var(--gold);
-  margin-top: 6px;
+  margin-top: 7px;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
@@ -74,11 +74,11 @@ body {
 }
 .tab-btn {
   flex: 1;
-  padding: 13px 0;
+  padding: 15px 0;
   background: none;
   border: none;
   color: var(--text-dim);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
   cursor: pointer;
   border-bottom: 2px solid transparent;
@@ -92,7 +92,7 @@ body {
 /* ── Section ─────────────────────────────────── */
 .section { padding: 12px 12px 0; }
 .section-title {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-dim);
   letter-spacing: 1.5px;
@@ -100,7 +100,7 @@ body {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .section-bar {
   display: inline-block;
@@ -124,11 +124,11 @@ body {
 .rec-scroll::-webkit-scrollbar { display: none; }
 
 .rec-card {
-  flex: 0 0 170px;
+  flex: 0 0 195px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 9px;
-  padding: 12px 11px 10px;
+  padding: 14px 13px 12px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -161,31 +161,31 @@ body {
   font-weight: 600;
 }
 .rec-rank {
-  font-size: 34px;
+  font-size: 40px;
   font-weight: 900;
   line-height: 1;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 .rec-card.short .rec-rank { color: var(--short); }
 .rec-card.long  .rec-rank { color: var(--long);  }
 
-.rec-name { font-size: 19px; font-weight: 700; color: var(--text-bright); }
-.rec-code { font-size: 13px; color: var(--text-dim); margin-bottom: 9px; }
+.rec-name { font-size: 22px; font-weight: 700; color: var(--text-bright); }
+.rec-code { font-size: 15px; color: var(--text-dim); margin-bottom: 10px; }
 
 .rec-price {
-  font-size: 19px;
+  font-size: 22px;
   font-weight: 700;
   font-family: 'SF Mono', 'Menlo', monospace;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 .c-up   { color: #FF4560; }  /* 台股：漲 = 紅 */
 .c-down { color: #00D97A; }  /* 台股：跌 = 綠 */
 .c-flat { color: var(--text);  }
 
-.rec-stars { font-size: 16px; letter-spacing: 2px; }
+.rec-stars { font-size: 18px; letter-spacing: 2px; }
 .s-on  { color: var(--gold); }
 .s-off { color: #1E2D3D; }
-.rec-risk-lbl { font-size: 13px; color: var(--text-dim); margin-top: 3px; }
+.rec-risk-lbl { font-size: 15px; color: var(--text-dim); margin-top: 4px; }
 
 /* ── Alert ───────────────────────────────────── */
 .alert-wrap { padding: 0 12px; }
@@ -201,8 +201,8 @@ body {
   align-items: center;
   gap: 8px;
 }
-.alert-name { font-size: 16px; font-weight: 600; color: var(--text-bright); }
-.alert-prices { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+.alert-name { font-size: 18px; font-weight: 600; color: var(--text-bright); }
+.alert-prices { font-size: 15px; color: var(--text-dim); margin-top: 2px; }
 .alert-badge {
   flex: 0 0 auto;
   font-size: 10px;
@@ -228,24 +228,24 @@ body {
 .stock-tabs::-webkit-scrollbar { display: none; }
 .stock-type-label {
   flex: 0 0 auto;
-  padding: 5px 8px;
-  font-size: 12px;
+  padding: 6px 8px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 1px;
   color: var(--text-dim);
   display: flex;
   align-items: center;
   white-space: nowrap;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 .stock-type-label.lbl-short { color: var(--short); }
 .stock-type-label.lbl-long  { color: var(--long);  }
 
 .stock-tab {
   flex: 0 0 auto;
-  padding: 6px 12px;
+  padding: 7px 14px;
   border-radius: 5px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   border: 1px solid var(--border);
@@ -266,16 +266,16 @@ body {
   align-items: flex-end;
   padding: 8px 0 6px;
 }
-.ci-name { font-size: 22px; font-weight: 700; color: var(--text-bright); }
-.ci-code { font-size: 14px; color: var(--text-dim); }
+.ci-name { font-size: 26px; font-weight: 700; color: var(--text-bright); }
+.ci-code { font-size: 16px; color: var(--text-dim); }
 .ci-price {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 700;
   font-family: 'SF Mono', monospace;
   text-align: right;
 }
-.ci-change { font-size: 13px; text-align: right; margin-top: 1px; }
-.ci-vol    { font-size: 12px; color: var(--text-dim); text-align: right; }
+.ci-change { font-size: 15px; text-align: right; margin-top: 2px; }
+.ci-vol    { font-size: 14px; color: var(--text-dim); text-align: right; }
 
 /* ── Chart Legend ────────────────────────────── */
 .chart-legend {
@@ -372,7 +372,7 @@ body {
 
 /* ── History ─────────────────────────────────── */
 .hist-wrap { overflow-x: auto; padding: 12px; }
-.hist-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.hist-table { width: 100%; border-collapse: collapse; font-size: 16px; }
 .hist-table th {
   background: var(--surface2);
   color: var(--text-dim);
@@ -745,7 +745,7 @@ body {
             series,
             annotations,
             colors: ['#00BFFF','#F0B429','#29B6F6','#29B6F6'],
-            stroke: { width:[1,1.5,1.5,1.5], dashArray:[0,0,0,0], curve:'smooth' },
+            stroke: { width:[1,2,2.5,2.5], dashArray:[0,0,0,0], curve:'smooth' },
             xaxis: {
                 type: 'datetime',
                 labels: { style: { colors:'#5A7A94', fontSize:'10px' } },
