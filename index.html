@@ -632,8 +632,9 @@ body {
             },
             theme:{ mode:'dark' },
             series:[{ name:'成交量', data:volData }],
-            colors, fill:{ colors },
-            plotOptions:{ bar:{ columnWidth:'80%' } },
+            colors,
+            plotOptions:{ bar:{ columnWidth:'80%', distributed:true } },
+            legend:{ show:false },
             xaxis:{ type:'datetime', labels:{ show:false }, axisBorder:{ color:'#1C2B3A' } },
             yaxis:{ labels:{
                 formatter: v => v>1000000?`${(v/1000000).toFixed(1)}M`:`${(v/1000).toFixed(0)}K`,
@@ -641,8 +642,7 @@ body {
             }},
             grid:{ borderColor:'#1C2B3A' },
             tooltip:{ theme:'dark', x:{ format:'yyyy/MM/dd' },
-                y:{ formatter: v => v?.toLocaleString()+' 張' } },
-            legend:{ show:false }
+                y:{ formatter: v => v?.toLocaleString()+' 張' } }
         };
 
         volumeChart = new ApexCharts(document.getElementById('volume-chart'), opts);
