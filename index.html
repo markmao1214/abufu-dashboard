@@ -1,408 +1,485 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>阿福交易儀表板</title>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>阿福交易儀表板</title>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: #080C10; }
+body {
+  color: #C8D8E8;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
 
-        :root {
-            --bg: #F0F2F5;
-            --surface: #FFFFFF;
-            --primary: #1A3A52;
-            --primary-light: #2A5A72;
-            --short: #C0392B;
-            --long: #1A6B2A;
-            --alert: #D97706;
-            --text: #1A202C;
-            --text-light: #718096;
-            --border: #E2E8F0;
-            --risk-low: #27AE60;
-            --risk-mid: #F39C12;
-            --risk-high: #E74C3C;
-            --radius: 10px;
-            --shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
+:root {
+  --bg:       #080C10;
+  --surface:  #0F1520;
+  --surface2: #141E2D;
+  --border:   #1C2B3A;
+  --short:    #FF4560;
+  --short-bg: rgba(255,69,96,0.12);
+  --long:     #00D97A;
+  --long-bg:  rgba(0,217,122,0.12);
+  --gold:     #F0B429;
+  --gold-bg:  rgba(240,180,41,0.12);
+  --text:     #C8D8E8;
+  --text-dim: #5A7A94;
+  --text-bright: #EAF4FF;
+}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
+/* ── Header ─────────────────────────────────── */
+.header {
+  background: linear-gradient(160deg, #0A1628 0%, #0D1E38 100%);
+  border-bottom: 1px solid #1A3050;
+  padding: 14px 16px 10px;
+  text-align: center;
+}
+.header-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-bright);
+  letter-spacing: 1px;
+}
+.header-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+.header-date {
+  display: inline-block;
+  background: rgba(240,180,41,0.1);
+  border: 1px solid rgba(240,180,41,0.35);
+  border-radius: 4px;
+  padding: 2px 12px;
+  font-size: 12px;
+  color: var(--gold);
+  margin-top: 6px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
 
-        .container { max-width: 1400px; margin: 0 auto; padding: 12px; }
+/* ── Tabs ────────────────────────────────────── */
+.tabs {
+  display: flex;
+  background: #080C10;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.tab-btn {
+  flex: 1;
+  padding: 11px 0;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
-        /* ── Header ── */
-        .header {
-            background: var(--primary);
-            color: white;
-            padding: 16px 24px;
-            border-radius: var(--radius);
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--shadow);
-        }
-        .header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
-        .header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
-        .header .date-badge {
-            background: rgba(255,255,255,0.15);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-        }
+/* ── Section ─────────────────────────────────── */
+.section { padding: 12px 12px 0; }
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+.section-bar {
+  display: inline-block;
+  width: 3px;
+  height: 13px;
+  border-radius: 2px;
+}
+.bar-short { background: var(--short); }
+.bar-long  { background: var(--long);  }
+.bar-gold  { background: var(--gold);  }
 
-        /* ── Tabs ── */
-        .tabs {
-            display: flex; gap: 4px;
-            background: var(--surface);
-            padding: 6px;
-            border-radius: var(--radius);
-            margin-bottom: 12px;
-            box-shadow: var(--shadow);
-        }
-        .tab-btn {
-            flex: 1; padding: 10px;
-            border: none; background: transparent;
-            color: var(--text-light);
-            font-size: 14px; font-weight: 500;
-            cursor: pointer; border-radius: 6px;
-            transition: all 0.2s;
-        }
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-            font-weight: 600;
-        }
-        .tab-btn:hover:not(.active) { background: var(--bg); color: var(--primary); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+/* ── Recommendation Cards (horizontal scroll) ── */
+.rec-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.rec-scroll::-webkit-scrollbar { display: none; }
 
-        /* ── Card ── */
-        .card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow);
-        }
-        .card-title {
-            font-size: 15px; font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 16px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border);
-            display: flex; align-items: center; gap: 8px;
-        }
+.rec-card {
+  flex: 0 0 155px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 11px 10px 9px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.rec-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 9px 9px 0 0;
+}
+.rec-card.short::after { background: linear-gradient(90deg, var(--short) 0%, transparent 100%); }
+.rec-card.long::after  { background: linear-gradient(90deg, var(--long)  0%, transparent 100%); }
 
-        /* ── 推薦卡片網格 ── */
-        .rec-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 12px;
-        }
+.rec-card:hover, .rec-card.active {
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(240,180,41,0.2);
+}
 
-        .rec-card {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.07);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-        .rec-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+.rec-score {
+  position: absolute;
+  top: 9px; right: 8px;
+  font-size: 10px;
+  background: var(--gold-bg);
+  border: 1px solid rgba(240,180,41,0.35);
+  border-radius: 3px;
+  padding: 2px 5px;
+  color: var(--gold);
+  font-weight: 600;
+}
+.rec-rank {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.rec-card.short .rec-rank { color: var(--short); }
+.rec-card.long  .rec-rank { color: var(--long);  }
 
-        .rec-card-header {
-            padding: 14px 16px;
-            display: flex; justify-content: space-between; align-items: flex-start;
-        }
-        .rec-card.short .rec-card-header { background: var(--short); color: white; }
-        .rec-card.long  .rec-card-header { background: var(--long);  color: white; }
+.rec-name { font-size: 15px; font-weight: 700; color: var(--text-bright); }
+.rec-code { font-size: 11px; color: var(--text-dim); margin-bottom: 7px; }
 
-        .rec-rank { font-size: 28px; font-weight: 800; opacity: 0.9; line-height: 1; }
-        .rec-name { font-size: 16px; font-weight: 700; }
-        .rec-code { font-size: 12px; opacity: 0.85; }
-        .rec-score-badge {
-            background: rgba(255,255,255,0.25);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-        }
+.rec-price {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  margin-bottom: 4px;
+}
+.c-up   { color: var(--short); }  /* 台股：漲 = 紅 */
+.c-down { color: var(--long);  }
+.c-flat { color: var(--text);  }
 
-        .rec-card-body { padding: 14px 16px; background: white; }
+.rec-stars { font-size: 12px; letter-spacing: 1px; }
+.s-on  { color: var(--gold); }
+.s-off { color: #1E2D3D; }
+.rec-risk-lbl { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
 
-        .rec-price-row {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 10px;
-        }
-        .rec-price { font-size: 20px; font-weight: 700; color: var(--primary); }
-        .rec-price-label { font-size: 11px; color: var(--text-light); }
+/* ── Alert ───────────────────────────────────── */
+.alert-wrap { padding: 0 12px; }
+.alert-item {
+  background: var(--surface);
+  border: 1px solid rgba(240,180,41,0.25);
+  border-left: 3px solid var(--gold);
+  border-radius: 7px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.alert-name { font-size: 14px; font-weight: 600; color: var(--text-bright); }
+.alert-prices { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.alert-badge {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--gold-bg);
+  border: 1px solid rgba(240,180,41,0.4);
+  border-radius: 4px;
+  padding: 3px 8px;
+  color: var(--gold);
+  white-space: nowrap;
+}
 
-        /* 風險評分 */
-        .risk-row {
-            display: flex; align-items: center; gap: 8px;
-            margin-bottom: 10px;
-        }
-        .risk-label { font-size: 11px; color: var(--text-light); white-space: nowrap; }
-        .risk-bar-wrap {
-            flex: 1; height: 6px;
-            background: var(--border); border-radius: 3px;
-            overflow: hidden;
-        }
-        .risk-bar {
-            height: 100%; border-radius: 3px;
-            transition: width 0.8s ease;
-        }
-        .risk-bar.low  { background: var(--risk-low); }
-        .risk-bar.medium { background: var(--risk-mid); }
-        .risk-bar.high { background: var(--risk-high); }
-        .risk-score-num {
-            font-size: 12px; font-weight: 700;
-            min-width: 28px; text-align: right;
-        }
-        .risk-score-num.low  { color: var(--risk-low); }
-        .risk-score-num.medium { color: var(--risk-mid); }
-        .risk-score-num.high { color: var(--risk-high); }
+/* ── Chart section ───────────────────────────── */
+.chart-section { padding: 10px 12px 0; }
 
-        /* 支撐阻力 */
-        .sr-row {
-            display: flex; gap: 8px; margin-bottom: 10px;
-        }
-        .sr-item {
-            flex: 1; background: var(--bg);
-            border-radius: 6px; padding: 6px 10px; text-align: center;
-        }
-        .sr-item-label { font-size: 10px; color: var(--text-light); margin-bottom: 2px; }
-        .sr-item-val   { font-size: 14px; font-weight: 700; }
-        .sr-support    { border-top: 2px solid var(--risk-low); }
-        .sr-resistance { border-top: 2px solid var(--risk-high); }
-        .sr-support .sr-item-val    { color: var(--risk-low); }
-        .sr-resistance .sr-item-val { color: var(--risk-high); }
+.stock-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+.stock-tabs::-webkit-scrollbar { display: none; }
+.stock-tab {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.stock-tab.short-type { border-left: 2px solid var(--short); }
+.stock-tab.long-type  { border-left: 2px solid var(--long);  }
+.stock-tab.sel-short  { background: var(--short-bg); border-color: var(--short); color: var(--short); }
+.stock-tab.sel-long   { background: var(--long-bg);  border-color: var(--long);  color: var(--long);  }
 
-        /* 操作建議 */
-        .advice-box {
-            background: #F8F9FF;
-            border-left: 3px solid var(--primary);
-            border-radius: 0 6px 6px 0;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-        }
-        .advice-box .advice-title { font-size: 10px; color: var(--text-light); margin-bottom: 4px; }
-        .advice-box .advice-text  { font-size: 12px; color: var(--text); line-height: 1.5; }
+/* ── Chart Stock Info bar ─────────────────────── */
+.chart-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 8px 0 6px;
+}
+.ci-name { font-size: 20px; font-weight: 700; color: var(--text-bright); }
+.ci-code { font-size: 12px; color: var(--text-dim); }
+.ci-price {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'SF Mono', monospace;
+  text-align: right;
+}
+.ci-change { font-size: 11px; text-align: right; margin-top: 1px; }
+.ci-vol    { font-size: 10px; color: var(--text-dim); text-align: right; }
 
-        .advice-params {
-            display: flex; gap: 6px;
-        }
-        .advice-param {
-            flex: 1; text-align: center;
-            background: var(--bg); border-radius: 4px;
-            padding: 5px 4px;
-        }
-        .advice-param-label { font-size: 9px; color: var(--text-light); }
-        .advice-param-val   { font-size: 12px; font-weight: 700; color: var(--primary); }
-        .advice-param.stop  .advice-param-val { color: var(--risk-high); }
-        .advice-param.target .advice-param-val { color: var(--risk-low); }
+/* ── Chart Legend ────────────────────────────── */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.leg-line { width: 18px; height: 2px; border-radius: 1px; }
+.leg-dash { width: 18px; height: 0; border-top: 2px dashed; }
 
-        /* 理由 */
-        .reason-box {
-            font-size: 11px; color: var(--text-light);
-            background: var(--bg); padding: 8px 10px;
-            border-radius: 6px; line-height: 1.6;
-        }
+/* ── Charts ──────────────────────────────────── */
+#main-chart {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-height: 290px;
+}
+#volume-chart {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-height: 85px;
+  margin-top: 4px;
+}
+.no-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
 
-        /* ── 圖表區 ── */
-        .stock-selector {
-            display: flex; flex-wrap: wrap; gap: 6px;
-            margin-bottom: 14px;
-        }
-        .stock-btn {
-            padding: 5px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 20px;
-            background: white;
-            font-size: 13px; font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .stock-btn:hover, .stock-btn.active {
-            background: var(--primary); color: white;
-            border-color: var(--primary);
-        }
-        .stock-btn.short-type.active { background: var(--short); border-color: var(--short); }
-        .stock-btn.long-type.active  { background: var(--long);  border-color: var(--long);  }
+/* ── Analysis Panel ──────────────────────────── */
+.analysis-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+  padding-bottom: 14px;
+}
+.ap-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+}
+.ap-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.ap-text {
+  font-size: 11px;
+  color: var(--text);
+  line-height: 1.65;
+  word-break: break-all;
+}
+.ap-text .stag { color: var(--gold); font-weight: 700; }
 
-        .chart-wrap { position: relative; }
-        #main-chart { height: 340px; }
-        #volume-chart { height: 100px; margin-top: 4px; }
+.stars-lg {
+  font-size: 21px;
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+.risk-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+.rl1 { background: rgba(90,122,148,0.15); color:#5A7A94; border:1px solid #2A3A4A; }
+.rl2 { background: rgba(41,182,246,0.12); color:#29B6F6; border:1px solid rgba(41,182,246,0.3); }
+.rl3 { background: var(--gold-bg);         color:var(--gold); border:1px solid rgba(240,180,41,0.35); }
+.rl4 { background: rgba(255,120,50,0.12);  color:#FF7832; border:1px solid rgba(255,120,50,0.3); }
+.rl5 { background: var(--short-bg);        color:var(--short); border:1px solid rgba(255,69,96,0.35); }
 
-        .chart-legend {
-            display: flex; gap: 16px; flex-wrap: wrap;
-            margin-bottom: 10px; font-size: 12px;
-        }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
-        .legend-dot  { width: 10px; height: 3px; border-radius: 2px; }
+/* ── History ─────────────────────────────────── */
+.hist-wrap { overflow-x: auto; padding: 12px; }
+.hist-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.hist-table th {
+  background: var(--surface2);
+  color: var(--text-dim);
+  padding: 8px;
+  text-align: left;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+.hist-table td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+.hist-table tr:hover td { background: var(--surface2); }
+.bdg-s { background: var(--short-bg); color: var(--short); border: 1px solid rgba(255,69,96,0.3); border-radius:3px; padding:1px 6px; font-size:10px; }
+.bdg-l { background: var(--long-bg);  color: var(--long);  border: 1px solid rgba(0,217,122,0.3); border-radius:3px; padding:1px 6px; font-size:10px; }
 
-        /* 支撐阻力 badges */
-        .sr-badges {
-            display: flex; gap: 8px; flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-        .sr-badge {
-            font-size: 11px; padding: 3px 10px;
-            border-radius: 20px; font-weight: 600;
-        }
-        .sr-badge.support    { background: #EAFAF1; color: var(--risk-low); border: 1px solid #A9DFBF; }
-        .sr-badge.resistance { background: #FDEDEC; color: var(--risk-high); border: 1px solid #F1948A; }
+/* ── Stats ───────────────────────────────────── */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; }
+.stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+.stat-num { font-size: 30px; font-weight: 800; color: var(--gold); font-family: 'SF Mono', monospace; }
+.stat-lbl { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
 
-        /* ── 處置預警 ── */
-        .alert-card {
-            background: #FFFBF0;
-            border-left: 4px solid var(--alert);
-            border-radius: 6px;
-            padding: 12px 16px;
-            margin-bottom: 8px;
-        }
-        .alert-card-header { display: flex; justify-content: space-between; align-items: center; }
-        .alert-name { font-weight: 700; font-size: 15px; }
-        .alert-status {
-            font-size: 11px; padding: 3px 10px;
-            background: var(--alert); color: white;
-            border-radius: 20px; font-weight: 600;
-        }
-        .alert-prices { display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: var(--text-light); }
-
-        /* ── 歷史表格 ── */
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        thead { background: var(--primary); color: white; }
-        th { padding: 10px 14px; font-weight: 600; text-align: left; }
-        td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
-        tbody tr:hover { background: var(--bg); }
-        .badge-short { background: #FDEDEC; color: var(--short); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-        .badge-long  { background: #EAFAF1; color: var(--long);  padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-
-        /* ── 統計 ── */
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
-        .stat-box {
-            background: var(--bg); border-radius: 8px; padding: 16px;
-            text-align: center; border-top: 3px solid var(--primary);
-        }
-        .stat-num   { font-size: 30px; font-weight: 800; color: var(--primary); }
-        .stat-label { font-size: 11px; color: var(--text-light); margin-top: 4px; }
-
-        /* ── Empty / Loading ── */
-        .empty { text-align: center; padding: 32px; color: var(--text-light); }
-        .spinner {
-            display: inline-block; width: 18px; height: 18px;
-            border: 2px solid var(--border); border-top-color: var(--primary);
-            border-radius: 50%; animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── Responsive ── */
-        @media (max-width: 640px) {
-            .header { flex-direction: column; gap: 8px; text-align: center; }
-            .header .meta { text-align: center; }
-            .rec-grid { grid-template-columns: 1fr; }
-            #main-chart { height: 260px; }
-            .stat-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-    </style>
+/* ── Utilities ───────────────────────────────── */
+.empty { text-align: center; padding: 20px; color: var(--text-dim); font-size: 13px; }
+.spinner {
+  width: 22px; height: 22px;
+  border: 2px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
     <script>
         // 儀表板資料已嵌入（由 html_generator.py 自動注入）
-        window.dashboardData = {"date": "20260505", "updated_at": "2026-05-05 17:26:54", "daily_recommendations": {"short": [{"rank": 1, "code": "3260", "name": "威剛", "score": 18, "price": 448.0, "reason": "★高檔出貨；主力賣-7.1%；主力持續賣(5日-3%/10日-4%)；乖離年線123%(高位)；當沖比61%(強隔日沖)；乖離月線12.0%", "risk_score": 55, "risk_level": "medium", "advice": {"summary": "位置佳，可佈空。止損：486.9元，目標：400.2元", "entry": 448.0, "stop_loss": 486.9, "target": 400.2, "support": 356.0, "resistance": 452.0}}, {"rank": 2, "code": "1815", "name": "富喬", "score": 17, "price": 116.0, "reason": "★高檔出貨；周轉率12.7%；主力大賣-17.0%；主力持續賣(5日-16%/10日-16%)；乖離年線47%(高位)；當沖比46%(高隔日沖)", "risk_score": 65, "risk_level": "high", "advice": {"summary": "可觀察，等待回測上軌後佈空。參考止損：127.0元", "entry": 116.0, "stop_loss": 127.0, "target": 113.0, "support": 110.0, "resistance": 122.5}}, {"rank": 3, "code": "2489", "name": "瑞軒", "score": 17, "price": 46.2, "reason": "★高檔出貨；周轉率14.2%；主力賣-6.0%；主力持續賣(5日-10%/10日-9%)；乖離年線112%(高位)；當沖比54%(高隔日沖)", "risk_score": 55, "risk_level": "medium", "advice": {"summary": "位置佳，可佈空。止損：50.1元，目標：42.2元", "entry": 46.2, "stop_loss": 50.1, "target": 42.2, "support": 42.0, "resistance": 49.8}}], "long": [{"rank": 1, "code": "1514", "name": "亞力", "score": 19, "price": 120.0, "reason": "強勢回測+主力連買；強勢回測(位階9/斜率0.89)；高位回測；主力連買9天(5日28%/10日16%)；連買5天以上；主力今日大買50.1%", "risk_score": 95, "risk_level": "high", "advice": {"summary": "位置偏高，多單風險高。建議觀望", "entry": 120.0, "stop_loss": 97.9, "target": 120.5, "support": 109.5, "resistance": 123.0}}, {"rank": 2, "code": "6239", "name": "力成", "score": 11, "price": 227.5, "reason": "強勢回測；強勢回測(位階10/斜率0.60)；高位回測；主力今日大買29.1%", "risk_score": 95, "risk_level": "high", "advice": {"summary": "位置偏高，多單風險高。建議觀望", "entry": 227.5, "stop_loss": 192.0, "target": 227.4, "support": 203.0, "resistance": 237.5}}, {"rank": 3, "code": "3715", "name": "定穎投控", "score": 9, "price": 196.5, "reason": "強勢回測；強勢回測(位階8/斜率0.66)；高位回測", "risk_score": 95, "risk_level": "high", "advice": {"summary": "位置偏高，多單風險高。建議觀望", "entry": 196.5, "stop_loss": 168.1, "target": 198.5, "support": 182.5, "resistance": 201.0}}], "disposal_alert": [{"code": "4807", "name": "日成-KY", "status": "注意中→即將處置", "upper_price": 22.2, "lower_price": 20.7}, {"code": "6405", "name": "悅城", "status": "注意中→即將處置", "upper_price": 63.55, "lower_price": 59.25}, {"code": "4958", "name": "臻鼎-KY", "status": "注意中→即將處置", "upper_price": 441.43, "lower_price": 411.57}]}, "price_data": {"3715": {"dates": ["2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05"], "closes": [170.5, 166.5, 183.0, 185.0, 203.5, 185.0, 175.0, 180.0, 172.0, 181.5, 194.5, 187.0, 186.5, 186.5, 186.5, 185.5, 186.5, 198.0, 190.5, 192.0, 189.0, 179.0, 183.0, 177.5, 179.0, 177.5, 174.0, 179.0, 196.5], "highs": [177.0, 177.0, 183.0, 197.0, 203.5, 203.0, 187.5, 187.5, 185.5, 184.0, 196.5, 194.5, 191.5, 191.5, 191.5, 192.0, 189.0, 201.0, 200.0, 198.0, 198.0, 193.5, 191.5, 187.0, 183.0, 179.0, 178.5, 183.0, 196.5], "lows": [167.5, 161.0, 170.5, 185.0, 183.0, 183.5, 172.0, 176.0, 172.0, 174.0, 188.0, 185.5, 185.0, 183.5, 183.0, 185.0, 182.5, 188.5, 190.0, 188.5, 189.0, 172.0, 181.0, 176.0, 176.0, 174.5, 173.0, 174.0, 178.0], "volumes": [26053202, 34568585, 36619964, 63752093, 76068013, 66346537, 45563705, 43135220, 32284145, 28009484, 43725388, 28116188, 23432150, 19120445, 18164108, 27455487, 15676245, 62912982, 34617617, 21840170, 22849951, 27458765, 20575678, 12324314, 9487305, 6661861, 12971289, 12440083, 46989008], "source": "yahoo.TW", "bollinger_bands": {"sma": [184.77500000000003, 185.70000000000002, 186.325, 186.325, 185.95, 184.72500000000002, 184.35000000000002, 184.3, 184.25, 185.47500000000002], "upper": [202.41437357164367, 202.14810019424738, 200.6158187309195, 200.6158187309195, 200.74493156455952, 197.4115085819543, 197.41942997991882, 197.51892582625382, 197.5409743811355, 198.53821170309968], "lower": [167.1356264283564, 169.25189980575266, 172.03418126908048, 172.03418126908048, 171.15506843544046, 172.03849141804574, 171.28057002008123, 171.0810741737462, 170.9590256188645, 172.41178829690037]}, "support_resistance": {"support": 182.5, "resistance": 201.0, "support_levels": [182.5, 173.0, 172.0], "resistance_levels": [201.0, 203.5], "period_high": 201.0, "period_low": 172.0}}, "3260": {"dates": ["2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05"], "closes": [412.0, 386.5, 405.0, 371.0, 390.5, 370.0, 335.0, 368.5, 361.5, 363.0, 389.0, 366.0, 372.0, 365.5, 376.0, 368.5, 360.5, 368.5, 358.0, 393.5, 421.5, 397.5, 400.0, 440.0, 484.0, 455.0, 436.0, 441.0, 448.0], "highs": [427.0, 412.0, 408.0, 403.0, 391.0, 397.5, 362.0, 368.5, 395.0, 384.0, 397.5, 387.0, 387.5, 386.5, 392.5, 390.0, 374.0, 381.5, 368.0, 393.5, 422.5, 452.0, 411.5, 440.0, 484.0, 482.0, 471.0, 451.0, 454.5], "lows": [412.0, 371.0, 388.0, 370.0, 334.0, 370.0, 335.0, 360.0, 361.0, 356.0, 374.0, 362.0, 367.0, 365.5, 373.0, 366.0, 355.0, 362.0, 346.0, 366.5, 386.5, 384.0, 387.0, 411.0, 450.5, 455.0, 433.0, 432.0, 436.5], "volumes": [8430876, 12067827, 8030562, 9116545, 10819196, 9016754, 9116701, 5504128, 29741825, 23024278, 25524298, 20734929, 21232759, 19539903, 27594811, 21164674, 14873282, 24603801, 23567351, 32475333, 49942949, 51699062, 33021498, 41883541, 59020990, 50862584, 37043686, 27401905, 30209696], "source": "yahoo.TWO", "bollinger_bands": {"sma": [374.02500000000003, 374.5, 375.05, 374.80000000000007, 378.25, 382.925, 387.175, 392.225, 395.85, 400.175], "upper": [408.47855569458693, 411.2219280539571, 412.78976682492885, 411.8018918435261, 424.82091366937095, 448.4080321533754, 459.4337537949555, 463.2999428420453, 469.07779526928283, 474.97759019579473], "lower": [339.57144430541314, 337.7780719460429, 337.3102331750712, 337.79810815647403, 331.67908633062905, 317.4419678466246, 314.9162462050445, 321.15005715795473, 322.6222047307172, 325.3724098042053]}, "support_resistance": {"support": 356.0, "resistance": 452.0, "support_levels": [356.0, 346.0, 334.0], "resistance_levels": [452.0, 484.0], "period_high": 484.0, "period_low": 346.0}}, "4958": {"dates": ["2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05"], "closes": [201.0, 197.0, 207.5, 218.5, 230.0, 226.5, 206.5, 219.5, 213.5, 225.0, 247.5, 263.5, 265.0, 257.5, 251.5, 251.5, 256.5, 282.0, 310.0, 315.0, 315.0, 325.0, 347.5, 358.5, 394.0, 383.0, 421.0, 432.5, 426.5], "highs": [207.5, 208.5, 214.0, 225.0, 234.5, 229.5, 221.5, 222.0, 237.0, 232.5, 247.5, 271.0, 271.0, 269.0, 265.0, 259.5, 260.0, 282.0, 310.0, 325.5, 324.5, 346.5, 357.5, 378.5, 394.0, 396.0, 421.0, 447.5, 445.0], "lows": [197.5, 190.0, 204.0, 207.0, 210.0, 215.0, 204.5, 215.0, 213.0, 219.0, 239.0, 250.0, 258.5, 256.5, 248.0, 247.0, 252.0, 258.0, 288.0, 303.5, 312.0, 311.0, 332.5, 331.0, 354.0, 380.0, 393.0, 421.0, 421.5], "volumes": [20977476, 21060991, 21870625, 42197602, 54567921, 32591650, 42552020, 26402227, 39243161, 37153512, 28247540, 50794415, 33198266, 25628573, 26354764, 22908167, 22693410, 42123860, 46468059, 76629681, 41558954, 111005718, 100773126, 95292695, 74669352, 70190139, 45468502, 79224330, 40197524], "source": "yahoo.TW", "bollinger_bands": {"sma": [242.25, 247.95000000000002, 254.35000000000002, 261.35, 268.35, 276.55000000000007, 284.375, 295.1, 305.75, 316.40000000000003], "upper": [308.43874526685033, 318.4424818686362, 328.33317376268747, 342.42965219461666, 357.2224366718951, 378.9843204204529, 393.9796873997641, 413.7316146733239, 433.2350971682573, 446.8333546298645], "lower": [176.06125473314967, 177.45751813136383, 180.3668262373126, 180.27034780538338, 179.47756332810496, 174.11567957954725, 174.77031260023594, 176.46838532667613, 178.26490283174272, 185.96664537013552]}, "support_resistance": {"support": 247.0, "resistance": 447.5, "support_levels": [247.0, 204.5], "resistance_levels": [], "period_high": 447.5, "period_low": 219.0}}, "6405": {"dates": ["2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05"], "closes": [29.5, 29.549999237060547, 30.350000381469727, 31.600000381469727, 30.649999618530273, 31.549999237060547, 30.75, 33.79999923706055, 37.150001525878906, 38.20000076293945, 37.0, 36.5, 36.70000076293945, 34.599998474121094, 35.400001525878906, 36.25, 35.95000076293945, 36.54999923706055, 36.75, 35.900001525878906, 37.5, 35.900001525878906, 36.150001525878906, 38.29999923706055, 42.099998474121094, 46.29999923706055, 50.900001525878906, 55.900001525878906, 61.400001525878906], "highs": [30.149999618530273, 30.600000381469727, 30.649999618530273, 32.75, 31.549999237060547, 32.29999923706055, 33.5, 33.79999923706055, 37.150001525878906, 40.5, 39.79999923706055, 37.599998474121094, 38.0, 36.20000076293945, 36.54999923706055, 36.849998474121094, 38.0, 36.95000076293945, 37.75, 37.45000076293945, 37.95000076293945, 38.0, 36.900001525878906, 38.70000076293945, 42.099998474121094, 46.29999923706055, 50.900001525878906, 55.900001525878906, 61.400001525878906], "lows": [28.899999618530273, 29.0, 29.600000381469727, 30.049999237060547, 30.299999237060547, 29.850000381469727, 30.600000381469727, 30.75, 36.20000076293945, 36.150001525878906, 36.900001525878906, 35.0, 35.75, 34.599998474121094, 34.5, 35.349998474121094, 35.79999923706055, 35.95000076293945, 36.70000076293945, 35.599998474121094, 36.099998474121094, 34.650001525878906, 35.650001525878906, 34.400001525878906, 36.0, 44.20000076293945, 50.900001525878906, 55.900001525878906, 56.099998474121094], "volumes": [233000, 148000, 173363, 1451230, 401325, 1033100, 1282000, 1544058, 1238663, 7391039, 3544076, 2318400, 1747340, 1161200, 1094005, 875108, 1313500, 695000, 1279300, 864000, 1617598, 1207132, 676000, 1907417, 6786057, 2765182, 1934582, 1126020, 12491054], "source": "yahoo.TW", "bollinger_bands": {"sma": [34.235000133514404, 34.6350001335144, 34.95250024795532, 35.24250030517578, 35.57750024795533, 36.150000190734865, 36.88750019073487, 37.89500026702881, 39.00000038146973, 40.21250038146973], "upper": [39.97643784517865, 40.1096788062471, 39.92416799229865, 39.76259774719162, 39.95910724123126, 40.79112066289075, 42.86553235946615, 45.85822197753552, 49.95495389018797, 54.83432969516873], "lower": [28.493562421850154, 29.1603214607817, 29.980832503611992, 30.722402863159942, 31.1958932546794, 31.508879718578978, 30.909468022003587, 29.931778556522104, 28.04504687275149, 25.590671067770735]}, "support_resistance": {"support": 34.5, "resistance": 61.4, "support_levels": [34.5, 34.4, 29.85], "resistance_levels": [], "period_high": 61.4, "period_low": 34.4}}, "4807": {"dates": ["2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05"], "closes": [15.949999809265137, 15.899999618530273, 15.800000190734863, 15.699999809265137, 15.0, 14.75, 14.350000381469727, 14.399999618530273, 14.25, 14.300000190734863, 14.25, 14.300000190734863, 14.25, 15.649999618530273, 15.100000381469727, 15.050000190734863, 15.0, 15.399999618530273, 15.449999809265137, 15.100000381469727, 15.050000190734863, 15.5, 15.899999618530273, 17.0, 17.200000762939453, 18.899999618530273, 20.75, 22.799999237060547, 21.450000762939453], "highs": [16.600000381469727, 15.949999809265137, 15.949999809265137, 15.949999809265137, 15.5, 14.800000190734863, 14.600000381469727, 14.649999618530273, 14.550000190734863, 14.300000190734863, 14.350000381469727, 14.350000381469727, 14.300000190734863, 15.649999618530273, 15.399999618530273, 15.350000381469727, 15.050000190734863, 15.399999618530273, 15.550000190734863, 15.399999618530273, 15.149999618530273, 15.75, 15.949999809265137, 17.399999618530273, 17.399999618530273, 18.899999618530273, 20.75, 22.799999237060547, 23.799999237060547], "lows": [15.899999618530273, 15.899999618530273, 15.800000190734863, 15.699999809265137, 15.0, 14.199999809265137, 14.300000190734863, 14.25, 14.25, 14.25, 14.25, 14.300000190734863, 14.25, 14.5, 15.0, 15.0, 14.899999618530273, 14.899999618530273, 15.399999618530273, 14.800000190734863, 14.899999618530273, 15.149999618530273, 15.449999809265137, 15.850000381469727, 16.700000762939453, 17.25, 18.799999237060547, 20.899999618530273, 21.450000762939453], "volumes": [24140, 26414, 32050, 48521, 161062, 506014, 89514, 85004, 45581, 34101, 31687, 39133, 28000, 197200, 209106, 110777, 54634, 74148, 53055, 47039, 63000, 197000, 113000, 307011, 162150, 425640, 858530, 957328, 788003], "source": "yahoo.TW", "bollinger_bands": {"sma": [14.997499990463258, 14.952500009536745, 14.932500028610232, 14.9375, 15.002500009536744, 15.112500047683717, 15.320000028610231, 15.640000009536745, 16.059999990463258, 16.420000028610232], "upper": [16.194360267593535, 16.067611933552, 15.991874727305474, 16.014010352213056, 16.372344742211546, 16.783988970859433, 17.657605554544737, 18.92079255379731, 20.532538126270673, 21.38390967109485], "lower": [13.80063971333298, 13.837388085521491, 13.87312532991499, 13.860989647786944, 13.632655276861943, 13.441011124508002, 12.982394502675726, 12.359207465276182, 11.587461854655842, 11.456090386125613]}, "support_resistance": {"support": 14.8, "resistance": 23.8, "support_levels": [14.8, 14.2], "resistance_levels": [], "period_high": 23.8, "period_low": 14.25}}, "2489": {"dates": ["2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05"], "closes": [34.79999923706055, 31.5, 32.599998474121094, 31.899999618530273, 35.04999923706055, 32.70000076293945, 31.25, 33.400001525878906, 32.20000076293945, 35.400001525878906, 38.900001525878906, 42.75, 45.29999923706055, 47.70000076293945, 45.70000076293945, 42.25, 44.0, 44.650001525878906, 42.599998474121094, 44.5, 44.099998474121094, 41.400001525878906, 38.5, 35.25, 38.20000076293945, 42.0, 42.099998474121094, 42.0, 46.20000076293945], "highs": [36.099998474121094, 36.79999923706055, 34.650001525878906, 33.099998474121094, 35.04999923706055, 35.5, 34.150001525878906, 34.349998474121094, 34.70000076293945, 35.400001525878906, 38.900001525878906, 42.75, 47.0, 49.79999923706055, 47.29999923706055, 44.0, 45.0, 46.0, 44.95000076293945, 44.5, 44.5, 44.75, 42.54999923706055, 37.099998474121094, 38.75, 42.0, 45.5, 42.79999923706055, 46.20000076293945], "lows": [34.79999923706055, 31.350000381469727, 31.5, 29.450000762939453, 31.0, 32.099998474121094, 30.899999618530273, 32.650001525878906, 31.799999237060547, 33.04999923706055, 38.150001525878906, 41.0, 40.599998474121094, 46.349998474121094, 44.20000076293945, 42.150001525878906, 42.0, 44.400001525878906, 42.599998474121094, 41.599998474121094, 43.099998474121094, 39.79999923706055, 38.5, 34.650001525878906, 36.0, 37.5, 41.5, 41.25, 40.349998474121094], "volumes": [26753616, 92361496, 100013963, 71978328, 57982216, 72137762, 59256526, 53404989, 50776313, 59026907, 34438728, 63246130, 226160044, 167125670, 92978495, 16498395, 7130997, 5060605, 7386173, 6863751, 4415691, 8606603, 8180103, 14314314, 9033082, 85058126, 108537982, 42591527, 87209104], "source": "yahoo.TW", "bollinger_bands": {"sma": [38.45750017166138, 38.922500133514404, 39.41750020980835, 39.7125002861023, 39.880000305175784, 40.03750038146973, 40.50250034332276, 41.04500026702881, 41.47500019073487, 42.17500019073487], "upper": [49.8621166744671, 50.450399878017144, 50.46834964325063, 50.32597607701725, 50.093197246550666, 50.04294211564433, 49.949535076932534, 49.49827703548307, 49.16990058866712, 48.846693779205765], "lower": [27.05288366885566, 27.394600389011664, 28.366650776366072, 29.099024495187344, 29.666803363800902, 30.032058647295123, 31.055465609712982, 32.59172349857455, 33.780099792802616, 35.503306602263976]}, "support_resistance": {"support": 42.0, "resistance": 49.8, "support_levels": [42.0, 34.65, 30.9], "resistance_levels": [49.8], "period_high": 49.8, "period_low": 33.05}}, "1514": {"dates": ["2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05"], "closes": [111.5, 113.0, 114.5, 110.5, 109.0, 105.0, 101.5, 103.0, 100.5, 100.0, 105.5, 103.0, 104.5, 106.5, 107.5, 109.0, 111.5, 114.0, 113.0, 114.0, 113.5, 111.0, 112.5, 111.5, 110.5, 111.0, 110.0, 121.0, 120.0], "highs": [117.0, 114.5, 117.0, 115.5, 109.0, 106.5, 105.5, 104.5, 104.5, 102.5, 105.5, 107.0, 104.5, 107.0, 108.5, 113.0, 113.0, 114.5, 117.5, 115.0, 116.0, 116.5, 113.5, 113.5, 112.0, 111.5, 113.0, 121.0, 123.0], "lows": [110.5, 110.0, 114.0, 110.5, 107.0, 104.0, 100.0, 102.0, 100.5, 100.0, 102.0, 102.0, 102.5, 102.5, 106.0, 109.0, 108.5, 110.5, 112.5, 113.0, 113.0, 108.5, 110.0, 110.0, 110.0, 110.0, 109.5, 112.5, 116.0], "volumes": [3231051, 2268519, 2088658, 1760427, 2052454, 1826276, 2611204, 1873629, 1205761, 985818, 1641459, 1420684, 1350264, 1900866, 1634149, 4716421, 3386108, 4594440, 5184444, 2326212, 1784948, 3782184, 1890113, 1451578, 1178357, 1052722, 1771926, 5537342, 13119223], "source": "yahoo.TW", "bollinger_bands": {"sma": [107.85000000000001, 107.95000000000002, 107.85000000000002, 107.75000000000001, 107.80000000000001, 107.875, 108.17500000000001, 108.60000000000001, 109.5, 110.475], "upper": [117.2206990134141, 117.5150405121986, 117.24201788754687, 116.89603739331959, 117.01628992599518, 117.15333497994118, 117.45010107761637, 117.3783825389419, 119.41463564635634, 120.49235993163867], "lower": [98.47930098658591, 98.38495948780144, 98.45798211245318, 98.60396260668044, 98.58371007400484, 98.59666502005882, 98.89989892238366, 99.82161746105811, 99.58536435364366, 100.45764006836131]}, "support_resistance": {"support": 109.5, "resistance": 123.0, "support_levels": [109.5, 108.5, 100.0], "resistance_levels": [], "period_high": 123.0, "period_low": 100.0}}, "6239": {"dates": ["2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05"], "closes": [192.0, 192.0, 203.5, 198.5, 195.0, 196.0, 187.0, 195.0, 202.0, 192.0, 211.0, 209.5, 214.5, 218.5, 217.5, 210.0, 212.5, 207.5, 208.0, 213.0, 218.5, 207.0, 210.0, 217.0, 218.5, 204.5, 203.0, 223.0, 227.5], "highs": [196.0, 199.0, 210.0, 211.5, 196.0, 198.0, 196.0, 197.5, 209.5, 206.0, 211.0, 219.0, 217.5, 220.5, 237.5, 218.5, 217.0, 212.5, 212.0, 217.5, 224.0, 225.5, 213.0, 224.5, 222.0, 220.0, 210.5, 223.0, 237.0], "lows": [190.0, 188.0, 199.0, 198.5, 192.0, 188.0, 185.5, 194.5, 197.5, 191.0, 199.5, 208.5, 212.0, 211.0, 217.0, 207.0, 208.5, 206.0, 206.0, 210.5, 211.5, 203.0, 207.5, 212.0, 213.0, 201.5, 201.0, 208.0, 220.0], "volumes": [8971245, 4513795, 7027464, 9439423, 6034664, 5821746, 7524655, 6612316, 12849885, 12855114, 10325140, 13107791, 10597780, 10811853, 25743130, 15277382, 9257765, 8068046, 9564875, 12781878, 17242994, 20489491, 9724089, 17027810, 11008820, 29668399, 25695769, 27188240, 38697234], "source": "yahoo.TW", "bollinger_bands": {"sma": [203.75, 205.075, 205.82500000000002, 206.15000000000003, 207.07500000000002, 208.25, 208.675, 209.47500000000002, 210.875, 212.15000000000003], "upper": [222.61663722023616, 224.1754581096894, 223.96687145803872, 224.34642822094494, 225.50127200493904, 226.4420312224886, 226.08268508446773, 224.067720788119, 225.0096206174768, 227.4081125962552], "lower": [184.88336277976384, 185.97454189031058, 187.6831285419613, 187.95357177905512, 188.648727995061, 190.0579687775114, 191.2673149155323, 194.88227921188104, 196.7403793825232, 196.89188740374487]}, "support_resistance": {"support": 203.0, "resistance": 237.5, "support_levels": [203.0, 201.0, 191.0], "resistance_levels": [237.5], "period_high": 237.5, "period_low": 191.0}}, "1815": {"dates": ["2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05"], "closes": [103.5, 98.80000305175781, 108.0, 104.5, 106.5, 103.5, 95.80000305175781, 98.69999694824219, 96.5999984741211, 102.0, 112.0, 121.5, 110.0, 113.0, 114.5, 112.0, 115.5, 127.0, 118.0, 119.0, 114.5, 108.0, 108.5, 108.0, 113.5, 110.5, 108.5, 109.0, 116.0], "highs": [104.0, 107.0, 108.5, 111.5, 106.5, 104.5, 106.0, 102.5, 102.5, 103.0, 112.0, 122.5, 122.0, 118.0, 121.0, 117.5, 121.5, 127.0, 129.5, 124.0, 120.5, 116.5, 112.5, 110.0, 113.5, 113.5, 112.5, 113.0, 117.0], "lows": [94.19999694824219, 97.0, 100.0, 104.0, 101.0, 100.0, 95.0, 98.0999984741211, 96.30000305175781, 97.5999984741211, 106.0, 110.5, 109.5, 108.0, 113.0, 111.0, 110.0, 115.5, 118.0, 117.5, 113.0, 105.0, 105.5, 104.0, 107.0, 108.0, 107.0, 107.0, 106.5], "volumes": [60796049, 71912800, 81418812, 95202165, 29675074, 24329923, 48601224, 29381255, 28964505, 29078847, 69345941, 159557717, 116251098, 95979378, 105107696, 59453052, 102852077, 126973142, 118740682, 57739476, 49490009, 44694452, 34748763, 34126925, 61033903, 30238644, 41177927, 39573772, 74732965], "source": "yahoo.TWO", "bollinger_bands": {"sma": [109.02000007629394, 109.57000007629395, 110.02999992370606, 110.05499992370605, 110.22999992370606, 110.57999992370605, 110.92999992370606, 111.56499977111817, 112.07999992370605, 113.05], "upper": [126.01336323856842, 126.52512883514606, 126.27575028055281, 126.28971287688897, 126.29600144178943, 126.6106706829937, 126.62931217635914, 125.71608187950334, 125.01856280558141, 123.94908253019491], "lower": [92.02663691401946, 92.61487131744184, 93.7842495668593, 93.82028697052313, 94.16399840562269, 94.54932916441841, 95.23068767105299, 97.413917662733, 99.1414370418307, 102.15091746980508]}, "support_resistance": {"support": 110.0, "resistance": 122.5, "support_levels": [110.0, 108.0, 104.0], "resistance_levels": [122.5, 129.5], "period_high": 129.5, "period_low": 97.6}}}, "history": [], "metadata": {"bollinger_period": 20, "bollinger_std_dev": 2, "history_days": 30, "total_recommendations": 6, "total_history_records": 0}};
+        window.dashboardData = {"date": "20260506", "updated_at": "2026-05-06 11:34:58", "daily_recommendations": {"short": [], "long": [], "disposal_alert": []}, "price_data": {}, "history": [], "metadata": {"bollinger_period": 20, "bollinger_std_dev": 2, "history_days": 30, "total_recommendations": 0, "total_history_records": 0}};
     </script>
 </head>
 <body>
-<div class="container">
 
-    <!-- Header -->
-    <div class="header">
-        <div>
-            <h1>🎯 阿福交易儀表板</h1>
-            <div class="meta" id="updated-time">載入中...</div>
-        </div>
-        <div class="date-badge" id="date-badge">--</div>
+<!-- Header -->
+<div class="header">
+  <div class="header-title">🎯 阿福交易儀表板</div>
+  <div class="header-sub" id="updated-time">載入中...</div>
+  <div class="header-date" id="date-badge">--</div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" data-tab="daily">今日推薦</button>
+  <button class="tab-btn" data-tab="history">歷史回溯</button>
+  <button class="tab-btn" data-tab="statistics">統計分析</button>
+</div>
+
+<!-- ══ 今日推薦 ══ -->
+<div id="daily" class="tab-content active">
+
+  <div class="section" style="margin-top:12px">
+    <div class="section-title"><span class="section-bar bar-short"></span>空方推薦 Top 3</div>
+    <div class="rec-scroll" id="short-list"><div class="empty"><div class="spinner"></div></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="section-bar bar-long"></span>多方推薦 Top 3</div>
+    <div class="rec-scroll" id="long-list"><div class="empty"><div class="spinner"></div></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="section-bar bar-gold"></span>注意處置預警</div>
+  </div>
+  <div class="alert-wrap" id="alert-list"><div class="empty">無預警</div></div>
+
+  <!-- 技術圖表 -->
+  <div class="chart-section">
+    <div class="section-title"><span class="section-bar bar-gold"></span>技術圖表</div>
+    <div class="stock-tabs" id="stock-selector"></div>
+    <div id="chart-info" style="display:none" class="chart-info">
+      <div>
+        <div class="ci-name" id="ci-name">—</div>
+        <div class="ci-code" id="ci-code">—</div>
+      </div>
+      <div>
+        <div class="ci-price" id="ci-price">—</div>
+        <div class="ci-change" id="ci-change">—</div>
+        <div class="ci-vol" id="ci-vol">—</div>
+      </div>
     </div>
-
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="daily">今日推薦</button>
-        <button class="tab-btn" data-tab="history">歷史回溯</button>
-        <button class="tab-btn" data-tab="statistics">統計分析</button>
+    <div class="chart-legend" id="chart-legend" style="display:none">
+      <div class="leg-item"><div class="leg-line" style="background:#F0B429"></div>20日均線</div>
+      <div class="leg-item"><div class="leg-dash" style="border-color:#FF4560"></div>布林上軌</div>
+      <div class="leg-item"><div class="leg-dash" style="border-color:#00D97A"></div>布林下軌</div>
+      <div class="leg-item"><div class="leg-line" style="background:#FF4560;width:14px;height:3px"></div>阻力</div>
+      <div class="leg-item"><div class="leg-line" style="background:#00D97A;width:14px;height:3px"></div>支撐</div>
     </div>
-
-    <!-- 今日推薦 -->
-    <div id="daily" class="tab-content active">
-
-        <!-- 空方 -->
-        <div class="card">
-            <div class="card-title">🔴 空方推薦 Top 3</div>
-            <div class="rec-grid" id="short-list">
-                <div class="empty"><div class="spinner"></div></div>
-            </div>
-        </div>
-
-        <!-- 多方 -->
-        <div class="card">
-            <div class="card-title">🟢 多方推薦 Top 3</div>
-            <div class="rec-grid" id="long-list">
-                <div class="empty"><div class="spinner"></div></div>
-            </div>
-        </div>
-
-        <!-- 處置預警 -->
-        <div class="card">
-            <div class="card-title">⚠️ 注意處置預警</div>
-            <div id="alert-list"><div class="empty">無預警</div></div>
-        </div>
-
-        <!-- K 線圖 -->
-        <div class="card">
-            <div class="card-title">📈 技術圖表</div>
-            <div class="stock-selector" id="stock-selector"></div>
-            <div class="sr-badges" id="sr-badges"></div>
-            <div class="chart-legend">
-                <span class="legend-item"><span class="legend-dot" style="background:#1A3A52;height:2px"></span> 20日均線</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#D97706;border-top:2px dashed #D97706;height:0"></span> 布林上軌</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#2980B9;border-top:2px dashed #2980B9;height:0"></span> 布林下軌</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#E74C3C;"></span> 阻力位</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#27AE60;"></span> 支撐位</span>
-            </div>
-            <div class="chart-wrap">
-                <div id="main-chart"></div>
-                <div id="volume-chart"></div>
-            </div>
-        </div>
+    <div id="main-chart"><div class="no-chart">請選擇標的</div></div>
+    <div id="volume-chart"></div>
+    <div class="analysis-panel" id="analysis-panel" style="display:none">
+      <div class="ap-card">
+        <div class="ap-title">籌碼分析</div>
+        <div class="ap-text" id="chip-text">—</div>
+      </div>
+      <div class="ap-card">
+        <div class="ap-title">主力出貨警示</div>
+        <div class="stars-lg" id="warn-stars">—</div>
+        <div id="warn-badge">—</div>
+      </div>
     </div>
+  </div>
 
-    <!-- 歷史回溯 -->
-    <div id="history" class="tab-content">
-        <div class="card">
-            <div class="card-title">📋 過去 30 天推薦記錄</div>
-            <div style="overflow-x:auto">
-                <table>
-                    <thead><tr><th>日期</th><th>代號</th><th>名稱</th><th>類型</th><th>評分</th></tr></thead>
-                    <tbody id="history-tbody"><tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+</div>
 
-    <!-- 統計分析 -->
-    <div id="statistics" class="tab-content">
-        <div class="card">
-            <div class="card-title">📊 推薦統計</div>
-            <div class="stat-grid" id="stat-grid">
-                <div class="empty"><div class="spinner"></div></div>
-            </div>
-        </div>
-    </div>
+<!-- ══ 歷史回溯 ══ -->
+<div id="history" class="tab-content">
+  <div class="hist-wrap">
+    <table class="hist-table">
+      <thead><tr><th>日期</th><th>代號</th><th>名稱</th><th>類型</th><th>評分</th></tr></thead>
+      <tbody id="history-tbody"><tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr></tbody>
+    </table>
+  </div>
+</div>
 
+<!-- ══ 統計分析 ══ -->
+<div id="statistics" class="tab-content">
+  <div class="stat-grid" id="stat-grid"><div class="empty"><div class="spinner"></div></div></div>
 </div>
 
 <script>
@@ -410,8 +487,9 @@
     let mainChart = null;
     let volumeChart = null;
     let currentCode = null;
+    let currentItem = null;
 
-    // ── Tab 切換 ──────────────────────────────────────────
+    // ── Tab 切換
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -423,13 +501,11 @@
 
     // ── 資料載入（html_generator.py 會在 <head> 注入 window.dashboardData）──────
     async function loadDashboardData() {
-        // 優先使用嵌入資料（由 html_generator.py 注入）
         if (window.dashboardData) {
             dashboardData = window.dashboardData;
             renderDashboard();
             return;
         }
-        // Fallback：嘗試從 URL 參數 fetch
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const dataUrl = urlParams.get('data') || 'dashboard_data.json';
@@ -438,22 +514,32 @@
             dashboardData = await res.json();
             renderDashboard();
         } catch(e) {
-            document.body.innerHTML = `<div style="padding:40px;text-align:center;color:#718096">
+            document.body.innerHTML = `<div style="padding:40px;text-align:center;color:#5A7A94">
                 <p style="font-size:18px;margin-bottom:8px">❌ 無法加載儀表板資料</p>
                 <p style="font-size:13px">${e.message}</p></div>`;
         }
     }
 
-    // ── 主渲染 ────────────────────────────────────────────
+    // ── 星級工具
+    function starsHTML(score, size='') {
+        const n = score >= 80 ? 5 : score >= 60 ? 4 : score >= 40 ? 3 : score >= 20 ? 2 : 1;
+        return Array.from({length:5}, (_,i) =>
+            `<span class="${i<n?'s-on':'s-off'}">★</span>`).join('');
+    }
+    function starInfo(score) {
+        if (score >= 80) return ['極度警戒','rl5'];
+        if (score >= 60) return ['高度警戒','rl4'];
+        if (score >= 40) return ['中度觀察','rl3'];
+        if (score >= 20) return ['輕度觀察','rl2'];
+        return ['低度觀察','rl1'];
+    }
+
+    // ── 主渲染
     function renderDashboard() {
         if (!dashboardData) return;
-
-        // Header
         document.getElementById('updated-time').textContent = `更新時間：${dashboardData.updated_at}`;
         const d = dashboardData.date;
-        document.getElementById('date-badge').textContent =
-            `${d.slice(0,4)}/${d.slice(4,6)}/${d.slice(6,8)}`;
-
+        document.getElementById('date-badge').textContent = `${d.slice(0,4)}/${d.slice(4,6)}/${d.slice(6,8)}`;
         renderRecommendations();
         renderAlerts();
         buildStockSelector();
@@ -461,276 +547,275 @@
         renderStatistics();
     }
 
-    // ── 推薦卡片 ──────────────────────────────────────────
+    // ── 推薦卡片
     function renderRecommendations() {
-        const { short = [], long = [] } = dashboardData.daily_recommendations;
-
+        const { short=[], long=[] } = dashboardData.daily_recommendations;
         document.getElementById('short-list').innerHTML = short.length
-            ? short.map(item => recCard(item, 'short')).join('')
-            : '<div class="empty">今日無做空推薦</div>';
-
+            ? short.map(r => recCard(r,'short')).join('') : '<div class="empty">今日無做空推薦</div>';
         document.getElementById('long-list').innerHTML = long.length
-            ? long.map(item => recCard(item, 'long')).join('')
-            : '<div class="empty">今日無做多推薦</div>';
+            ? long.map(r => recCard(r,'long')).join('') : '<div class="empty">今日無做多推薦</div>';
     }
 
     function recCard(item, type) {
-        const price  = item.price > 0 ? `NT$${item.price.toFixed(2)}` : 'N/A';
-        const score  = item.risk_score ?? 50;
-        const level  = item.risk_level ?? 'medium';
-        const advice = item.advice ?? {};
-        const adv    = advice.summary ?? '等待訊號';
-        const sl     = advice.stop_loss ? `NT$${advice.stop_loss}` : '—';
-        const tgt    = advice.target    ? `NT$${advice.target}`    : '—';
-        const sup    = advice.support    ? `NT$${advice.support}`   : '—';
-        const res    = advice.resistance ? `NT$${advice.resistance}` : '—';
-
-        const riskLabelMap = { low: '低風險', medium: '中風險', high: '高風險' };
-
+        const price = item.price > 0 ? `NT$${Number(item.price).toLocaleString()}` : 'N/A';
+        const priceClass = item.price > 0 ? (type==='short' ? 'c-up' : 'c-down') : 'c-flat';
+        const score = item.risk_score ?? 50;
+        const [lbl] = starInfo(score);
         return `
-        <div class="rec-card ${type}" onclick="showChart('${item.code}')">
-            <div class="rec-card-header">
-                <div>
-                    <div class="rec-rank">${item.rank}</div>
-                    <div class="rec-name">${item.name}</div>
-                    <div class="rec-code">${item.code}</div>
-                </div>
-                <div>
-                    <div class="rec-score-badge">評分 ${item.score}</div>
-                </div>
-            </div>
-            <div class="rec-card-body">
-                <div class="rec-price-row">
-                    <div>
-                        <div class="rec-price">${price}</div>
-                        <div class="rec-price-label">現價</div>
-                    </div>
-                    <div style="text-align:right">
-                        <div style="font-size:11px;color:var(--text-light)">風險評估</div>
-                        <div class="risk-score-num ${level}">${riskLabelMap[level]}</div>
-                    </div>
-                </div>
-
-                <div class="risk-row">
-                    <div class="risk-label">風險 ${score}</div>
-                    <div class="risk-bar-wrap"><div class="risk-bar ${level}" style="width:${score}%"></div></div>
-                </div>
-
-                <div class="sr-row">
-                    <div class="sr-item sr-support">
-                        <div class="sr-item-label">支撐位</div>
-                        <div class="sr-item-val">${sup}</div>
-                    </div>
-                    <div class="sr-item sr-resistance">
-                        <div class="sr-item-label">阻力位</div>
-                        <div class="sr-item-val">${res}</div>
-                    </div>
-                </div>
-
-                <div class="advice-box">
-                    <div class="advice-title">操作建議</div>
-                    <div class="advice-text">${adv}</div>
-                </div>
-
-                <div class="advice-params">
-                    <div class="advice-param"><div class="advice-param-label">進場</div><div class="advice-param-val">${price}</div></div>
-                    <div class="advice-param stop"><div class="advice-param-label">止損</div><div class="advice-param-val">${sl}</div></div>
-                    <div class="advice-param target"><div class="advice-param-label">目標</div><div class="advice-param-val">${tgt}</div></div>
-                </div>
-
-                <div class="reason-box" style="margin-top:10px">${item.reason}</div>
-            </div>
+        <div class="rec-card ${type}" onclick="showChart('${item.code}')" data-code="${item.code}">
+          <div class="rec-score">評分 ${item.score}</div>
+          <div class="rec-rank">${item.rank}</div>
+          <div class="rec-name">${item.name}</div>
+          <div class="rec-code">${item.code}</div>
+          <div class="rec-price ${priceClass}">${price}</div>
+          <div class="rec-stars">${starsHTML(score)}</div>
+          <div class="rec-risk-lbl">${lbl}</div>
         </div>`;
     }
 
-    // ── 處置預警 ──────────────────────────────────────────
+    // ── 處置預警
     function renderAlerts() {
         const alerts = dashboardData.daily_recommendations.disposal_alert ?? [];
-        const el = document.getElementById('alert-list');
-        el.innerHTML = alerts.length
+        document.getElementById('alert-list').innerHTML = alerts.length
             ? alerts.map(a => `
-                <div class="alert-card">
-                    <div class="alert-card-header">
-                        <div class="alert-name">${a.code} ${a.name}</div>
-                        <div class="alert-status">${a.status}</div>
-                    </div>
-                    <div class="alert-prices">
-                        <span>漲停門檻：NT$${a.upper_price?.toFixed(2) ?? 'N/A'}</span>
-                        <span>跌停門檻：NT$${a.lower_price?.toFixed(2) ?? 'N/A'}</span>
-                    </div>
-                </div>`).join('')
+              <div class="alert-item">
+                <div>
+                  <div class="alert-name">${a.code} ${a.name}</div>
+                  <div class="alert-prices">漲停門檻：NT$${a.upper_price?.toFixed(2)??'—'} ／ 跌停門檻：NT$${a.lower_price?.toFixed(2)??'—'}</div>
+                </div>
+                <div class="alert-badge">${a.status}</div>
+              </div>`).join('')
             : '<div class="empty">目前無注意處置標的</div>';
     }
 
-    // ── 股票選擇器 ────────────────────────────────────────
+    // ── 股票選擇器
     function buildStockSelector() {
-        const { short = [], long = [] } = dashboardData.daily_recommendations;
+        const { short=[], long=[] } = dashboardData.daily_recommendations;
         const codes = [
-            ...short.map(r => ({ code: r.code, name: r.name, type: 'short' })),
-            ...long.map(r  => ({ code: r.code, name: r.name, type: 'long'  }))
+            ...short.map(r=>({code:r.code,name:r.name,type:'short'})),
+            ...long.map(r=>({code:r.code,name:r.name,type:'long'}))
         ];
-
-        const selector = document.getElementById('stock-selector');
-        selector.innerHTML = codes.map(c => `
-            <button class="stock-btn ${c.type}-type" onclick="showChart('${c.code}')" data-code="${c.code}">
+        document.getElementById('stock-selector').innerHTML = codes.map(c=>`
+            <div class="stock-tab ${c.type}-type" onclick="showChart('${c.code}')" data-code="${c.code}">
                 ${c.code} ${c.name}
-            </button>`).join('');
-
+            </div>`).join('');
         if (codes.length > 0) showChart(codes[0].code);
     }
 
-    // ── K 線 + 成交量圖表 ─────────────────────────────────
+    // ── 顯示圖表
     function showChart(code) {
         currentCode = code;
+        const { short=[], long=[] } = dashboardData.daily_recommendations;
+        currentItem = [...short,...long].find(r=>r.code===code) || null;
 
-        // 更新 selector 狀態
-        document.querySelectorAll('.stock-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.code === code);
+        // 更新 tab 狀態
+        document.querySelectorAll('.stock-tab').forEach(t => {
+            t.classList.remove('sel-short','sel-long');
+            if (t.dataset.code === code) {
+                t.classList.add(t.classList.contains('short-type') ? 'sel-short' : 'sel-long');
+            }
         });
+
+        // 更新 stock info bar
+        const infoEl = document.getElementById('chart-info');
+        if (currentItem) {
+            infoEl.style.display = 'flex';
+            document.getElementById('ci-name').textContent  = currentItem.name;
+            document.getElementById('ci-code').textContent  = currentItem.code;
+            const p = currentItem.price;
+            document.getElementById('ci-price').textContent = p > 0 ? `NT$${Number(p).toLocaleString()}` : 'N/A';
+            document.getElementById('ci-price').className   = 'ci-price ' + (p>0?(currentItem.type==='short'?'c-up':'c-down'):'c-flat');
+            document.getElementById('ci-change').textContent = '';
+            document.getElementById('ci-vol').textContent    = '';
+        } else {
+            infoEl.style.display = 'none';
+        }
 
         const data = dashboardData.price_data?.[code];
         if (!data || !data.closes?.length) {
-            document.getElementById('main-chart').innerHTML =
-                '<div class="empty">此標的無 K 線資料（非交易時段）</div>';
+            document.getElementById('main-chart').innerHTML = '<div class="no-chart">此標的無 K 線資料（非交易時段）</div>';
+            if (volumeChart) { volumeChart.destroy(); volumeChart = null; }
             document.getElementById('volume-chart').innerHTML = '';
-            document.getElementById('sr-badges').innerHTML = '';
+            document.getElementById('analysis-panel').style.display = 'none';
+            document.getElementById('chart-legend').style.display = 'none';
             return;
         }
 
-        renderSRBadges(code, data);
+        document.getElementById('chart-legend').style.display = 'flex';
         renderMainChart(code, data);
         renderVolumeChart(code, data);
+        renderAnalysisPanel();
     }
 
-    function renderSRBadges(code, data) {
-        const sr = data.support_resistance ?? {};
-        const badges = document.getElementById('sr-badges');
-        const sup = sr.support ? `NT$${sr.support}` : null;
-        const res = sr.resistance ? `NT$${sr.resistance}` : null;
-        const pHigh = sr.period_high ? `NT$${sr.period_high}` : null;
-        const pLow  = sr.period_low  ? `NT$${sr.period_low}`  : null;
-
-        badges.innerHTML = [
-            sup   ? `<span class="sr-badge support">支撐 ${sup}</span>` : '',
-            res   ? `<span class="sr-badge resistance">阻力 ${res}</span>` : '',
-            pHigh ? `<span class="sr-badge resistance">近期高 ${pHigh}</span>` : '',
-            pLow  ? `<span class="sr-badge support">近期低 ${pLow}</span>` : '',
-        ].join('');
-    }
-
+    // ── K 線主圖
     function renderMainChart(code, data) {
         if (mainChart) { mainChart.destroy(); mainChart = null; }
 
-        const bb = data.bollinger_bands ?? {};
-        const sr = data.support_resistance ?? {};
-        const bbLen = bb.sma?.length ?? 0;
-        const startIdx = data.closes.length - bbLen;
-
-        // K 線資料
-        const candles = data.dates.map((date, i) => ({
-            x: new Date(date).getTime(),
-            y: [data.closes[i], data.highs[i], data.lows[i], data.closes[i]]
+        const candleData = data.dates.map((d,i) => ({
+            x: new Date(d).getTime(),
+            y: [data.highs?.[i]??data.closes[i], data.highs?.[i]??data.closes[i],
+                data.lows?.[i]??data.closes[i],  data.closes[i]]
         }));
 
-        // BB 資料
-        const bbDates = data.dates.slice(startIdx);
-        const mkLine = (arr) => bbDates.map((d, i) => ({ x: new Date(d).getTime(), y: arr[i] ? +arr[i].toFixed(2) : null }));
+        const series = [{ name: 'K線', type: 'candlestick', data: candleData }];
 
+        const bb = data.bollinger_bands;
+        if (bb?.sma?.length) {
+            const mkLine = (arr, name) => ({
+                name, type: 'line',
+                data: data.dates.map((d,i) => arr[i]!=null ? {x:new Date(d).getTime(),y:arr[i]} : null).filter(Boolean)
+            });
+            series.push(mkLine(bb.sma,   '20日均線'));
+            series.push(mkLine(bb.upper, '布林上軌'));
+            series.push(mkLine(bb.lower, '布林下軌'));
+        }
+
+        // annotations
         const annotations = { yaxis: [] };
-        if (sr.support)    annotations.yaxis.push({ y: sr.support,    borderColor: '#27AE60', label: { text: `支撐 ${sr.support}`, style: { color: '#fff', background: '#27AE60', fontSize: '10px' } } });
-        if (sr.resistance) annotations.yaxis.push({ y: sr.resistance, borderColor: '#E74C3C', label: { text: `阻力 ${sr.resistance}`, style: { color: '#fff', background: '#E74C3C', fontSize: '10px' } } });
+        const sr = data.support_resistance ?? {};
+
+        if (sr.resistance > 0) annotations.yaxis.push({
+            y: sr.resistance, borderColor: '#FF4560', borderWidth: 1, strokeDashArray: 5, opacity: 0.8,
+            label: { text: `阻力 ${sr.resistance}`, position: 'right',
+                style: { background:'rgba(255,69,96,0.15)', color:'#FF4560', fontSize:'10px', fontWeight:600,
+                    padding:{left:5,right:5,top:2,bottom:2}, border:{width:1,color:'rgba(255,69,96,0.4)'} } }
+        });
+        if (sr.support > 0) annotations.yaxis.push({
+            y: sr.support, borderColor: '#00D97A', borderWidth: 1, strokeDashArray: 5, opacity: 0.8,
+            label: { text: `支撐 ${sr.support}`, position: 'right',
+                style: { background:'rgba(0,217,122,0.15)', color:'#00D97A', fontSize:'10px', fontWeight:600,
+                    padding:{left:5,right:5,top:2,bottom:2}, border:{width:1,color:'rgba(0,217,122,0.4)'} } }
+        });
+
+        // 建議空點 / 建議停損
+        if (currentItem?.advice) {
+            const adv = currentItem.advice;
+            if (adv.entry > 0) annotations.yaxis.push({
+                y: adv.entry, borderColor: '#F0B429', borderWidth: 1.5, strokeDashArray: 0, opacity: 1,
+                label: { text: `建議空點：${adv.entry}`, position: 'left',
+                    style: { background:'rgba(240,180,41,0.18)', color:'#F0B429', fontSize:'10px', fontWeight:700,
+                        padding:{left:7,right:7,top:3,bottom:3}, border:{width:1,color:'rgba(240,180,41,0.5)'} } }
+            });
+            if (adv.stop_loss > 0) annotations.yaxis.push({
+                y: adv.stop_loss, borderColor: '#FF4560', borderWidth: 1.5, strokeDashArray: 6, opacity: 1,
+                label: { text: `建議停損：${adv.stop_loss}`, position: 'left',
+                    style: { background:'rgba(255,69,96,0.18)', color:'#FF4560', fontSize:'10px', fontWeight:700,
+                        padding:{left:7,right:7,top:3,bottom:3}, border:{width:1,color:'rgba(255,69,96,0.5)'} } }
+            });
+        }
 
         const opts = {
-            chart: { type: 'candlestick', height: 340, id: 'candles', group: 'stock',
-                toolbar: { show: true, tools: { download: false, selection: true, zoom: true, zoomin: true, zoomout: true, pan: true, reset: true } },
-                animations: { enabled: false } },
+            chart: {
+                type: 'candlestick', height: 300, id: 'candles', group: 'stock',
+                background: '#0F1520', foreColor: '#5A7A94',
+                toolbar: { show: true, tools: { download:false, selection:true, zoom:true, zoomin:true, zoomout:true, pan:true, reset:true } },
+                animations: { enabled: false },
+            },
+            theme: { mode: 'dark' },
+            series,
             annotations,
-            series: [
-                { name: 'K線', type: 'candlestick', data: candles },
-                { name: '20日均線', type: 'line', data: mkLine(bb.sma ?? []) },
-                { name: '布林上軌', type: 'line', data: mkLine(bb.upper ?? []) },
-                { name: '布林下軌', type: 'line', data: mkLine(bb.lower ?? []) },
-            ],
-            stroke: { width: [1, 2, 1.5, 1.5], dashArray: [0, 0, 4, 4], curve: 'smooth' },
-            colors: ['transparent', '#1A3A52', '#D97706', '#2980B9'],
-            xaxis: { type: 'datetime', labels: { format: 'MM/dd', style: { fontSize: '10px' } } },
-            yaxis: { labels: { formatter: v => v?.toFixed(1) ?? '' }, tooltip: { enabled: true } },
-            tooltip: { shared: true, x: { format: 'yyyy/MM/dd' } },
-            legend: { show: false },
-            grid: { borderColor: '#F0F2F5' },
+            colors: ['#F0B429','#FF4560','#00D97A'],
+            stroke: { width:[1,1.5,1,1], dashArray:[0,0,4,4], curve:'smooth' },
+            xaxis: {
+                type: 'datetime',
+                labels: { style: { colors:'#5A7A94', fontSize:'10px' } },
+                axisBorder: { color:'#1C2B3A' }, axisTicks: { color:'#1C2B3A' }
+            },
+            yaxis: {
+                labels: { style: { colors:'#5A7A94', fontSize:'10px' }, formatter: v => v?.toFixed(1) },
+                tooltip: { enabled: true }
+            },
+            grid: { borderColor: '#1C2B3A' },
             plotOptions: {
-                candlestick: {
-                    colors: { upward: '#E74C3C', downward: '#27AE60' },
-                    wick: { useFillColor: true }
-                }
-            }
+                candlestick: { colors: { upward:'#FF4560', downward:'#00D97A' }, wick: { useFillColor:true } }
+            },
+            tooltip: { theme:'dark', x: { format:'yyyy/MM/dd' } },
+            legend: { show: false }
         };
 
         mainChart = new ApexCharts(document.getElementById('main-chart'), opts);
         mainChart.render();
     }
 
+    // ── 成交量圖
     function renderVolumeChart(code, data) {
         if (volumeChart) { volumeChart.destroy(); volumeChart = null; }
         if (!data.volumes?.length) return;
 
-        const volData = data.dates.map((d, i) => ({
-            x: new Date(d).getTime(),
-            y: data.volumes[i]
-        }));
-
-        const colors = data.dates.map((d, i) => {
-            if (i === 0) return '#aaa';
-            return data.closes[i] >= data.closes[i-1] ? '#E74C3C' : '#27AE60';
-        });
+        const volData = data.dates.map((d,i) => ({ x:new Date(d).getTime(), y:data.volumes[i] }));
+        const colors  = data.dates.map((_,i) => i===0?'#5A7A94' : data.closes[i]>=data.closes[i-1]?'#FF4560':'#00D97A');
 
         const opts = {
-            chart: { type: 'bar', height: 100, id: 'volume', group: 'stock',
-                toolbar: { show: false }, animations: { enabled: false },
-                brush: { target: 'candles', enabled: true } },
-            series: [{ name: '成交量', data: volData }],
-            colors,
-            fill: { colors },
-            plotOptions: { bar: { columnWidth: '80%' } },
-            xaxis: { type: 'datetime', labels: { show: false } },
-            yaxis: { labels: { formatter: v => v > 1000000 ? `${(v/1000000).toFixed(1)}M` : `${(v/1000).toFixed(0)}K`, style: { fontSize: '9px' } } },
-            grid: { borderColor: '#F0F2F5' },
-            tooltip: { x: { format: 'yyyy/MM/dd' }, y: { formatter: v => v?.toLocaleString() + ' 張' } }
+            chart: {
+                type:'bar', height:90, id:'volume', group:'stock',
+                background:'#0F1520', foreColor:'#5A7A94',
+                toolbar:{ show:false }, animations:{ enabled:false },
+                brush:{ target:'candles', enabled:true }
+            },
+            theme: { mode:'dark' },
+            series: [{ name:'成交量', data:volData }],
+            colors, fill:{ colors },
+            plotOptions: { bar: { columnWidth:'80%' } },
+            xaxis: { type:'datetime', labels:{ show:false }, axisBorder:{ color:'#1C2B3A' } },
+            yaxis: { labels: {
+                formatter: v => v>1000000?`${(v/1000000).toFixed(1)}M`:`${(v/1000).toFixed(0)}K`,
+                style: { colors:'#5A7A94', fontSize:'9px' }
+            }},
+            grid: { borderColor:'#1C2B3A' },
+            tooltip: { theme:'dark', x:{ format:'yyyy/MM/dd' }, y:{ formatter: v => v?.toLocaleString()+' 張' } },
+            legend: { show:false }
         };
 
         volumeChart = new ApexCharts(document.getElementById('volume-chart'), opts);
         volumeChart.render();
     }
 
-    // ── 歷史回溯 ──────────────────────────────────────────
+    // ── 底部分析面板
+    function renderAnalysisPanel() {
+        const panel = document.getElementById('analysis-panel');
+        if (!currentItem) { panel.style.display='none'; return; }
+        panel.style.display = 'grid';
+
+        // 籌碼分析：格式化理由，策略標籤金色
+        const reason = (currentItem.reason || '—');
+        const html = reason.split('；').map(s => {
+            if (/★|高檔出貨|月下彎|價籌背離|布林開口|強勢回測|主力連買/.test(s))
+                return `<span class="stag">${s}</span>`;
+            return s;
+        }).join('；');
+        document.getElementById('chip-text').innerHTML = html;
+
+        // 主力出貨警示
+        const score = currentItem.risk_score ?? 50;
+        const [lbl, cls] = starInfo(score);
+        document.getElementById('warn-stars').innerHTML = starsHTML(score);
+        document.getElementById('warn-badge').innerHTML = `<span class="risk-badge ${cls}">${lbl}</span>`;
+    }
+
+    // ── 歷史回溯
     function renderHistory() {
         const history = dashboardData.history ?? [];
-        const tbody = document.getElementById('history-tbody');
-        tbody.innerHTML = history.length
+        document.getElementById('history-tbody').innerHTML = history.length
             ? history.map(h => `<tr>
                 <td>${h.date?.slice(0,4)}/${h.date?.slice(4,6)}/${h.date?.slice(6,8)}</td>
                 <td>${h.code}</td><td>${h.name}</td>
-                <td><span class="badge-${h.type === 'short' ? 'short' : 'long'}">${h.type === 'short' ? '做空' : '做多'}</span></td>
+                <td><span class="bdg-${h.type==='short'?'s':'l'}">${h.type==='short'?'做空':'做多'}</span></td>
                 <td>${h.score}</td></tr>`).join('')
             : '<tr><td colspan="5" class="empty">尚無歷史記錄</td></tr>';
     }
 
-    // ── 統計分析 ──────────────────────────────────────────
+    // ── 統計分析
     function renderStatistics() {
         const meta = dashboardData.metadata ?? {};
         const hist = dashboardData.history ?? [];
-        const shortCount = hist.filter(h => h.type === 'short').length;
-        const longCount  = hist.filter(h => h.type === 'long').length;
-
         document.getElementById('stat-grid').innerHTML = [
-            { num: meta.total_recommendations ?? 0, label: '今日推薦' },
-            { num: meta.total_history_records ?? 0, label: '歷史記錄' },
-            { num: shortCount, label: '空方歷史' },
-            { num: longCount,  label: '多方歷史' },
-        ].map(s => `<div class="stat-box"><div class="stat-num">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
+            { num: meta.total_recommendations??0, lbl:'今日推薦' },
+            { num: meta.total_history_records??0,  lbl:'歷史記錄' },
+            { num: hist.filter(h=>h.type==='short').length, lbl:'空方歷史' },
+            { num: hist.filter(h=>h.type==='long').length,  lbl:'多方歷史' },
+        ].map(s=>`<div class="stat-box"><div class="stat-num">${s.num}</div><div class="stat-lbl">${s.lbl}</div></div>`).join('');
     }
 
-    // 啟動
     loadDashboardData();
 </script>
 </body>
