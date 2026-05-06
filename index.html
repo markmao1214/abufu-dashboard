@@ -218,6 +218,9 @@ body {
   border-radius: 8px;
   min-height: 300px;
 }
+#main-chart:empty {
+  min-height: 300px;
+}
 #volume-chart {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -357,7 +360,7 @@ body {
       <div class="leg-item"><div class="leg-dash" style="border-color:#00D97A"></div>支撐</div>
     </div>
 
-    <div id="main-chart"><div class="no-chart">請選擇標的</div></div>
+    <div id="main-chart"></div>
     <div id="volume-chart"></div>
   </div>
 
