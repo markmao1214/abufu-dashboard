@@ -175,8 +175,22 @@ body {
 .rc-badge.short-badge { background: rgba(0,217,122,0.12); color: var(--short); }
 .rc-badge.long-badge  { background: rgba(255,69,96,0.12);  color: var(--long);  }
 
+/* ── Chart Panel（inline，跟著卡片展開）────────── */
+#chart-panel {
+  margin: 0 14px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+  animation: slideDown 0.2s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Chart Section ───────────────────────────── */
-.chart-section { padding: 0 14px; }
+.chart-section { padding: 10px 14px 0; }
 
 /* ── Chart Info Bar ──────────────────────────── */
 .chart-info {
@@ -398,12 +412,8 @@ body {
 <!-- ══ 今日推薦 ══ -->
 <div id="daily" class="tab-content active">
 
-  <div class="section" style="margin-top:14px">
-    <div class="section-title"><span class="section-bar bar-gold"></span>技術圖表</div>
-  </div>
-
   <!-- 推薦卡片清單 -->
-  <div id="rec-list">
+  <div id="rec-list" style="margin-top:12px">
     <div class="rec-section">
       <div class="rec-section-title lbl-short">空方</div>
       <div id="short-cards"></div>
@@ -414,7 +424,8 @@ body {
     </div>
   </div>
 
-  <!-- K 線區 -->
+  <!-- K 線區（inline，跟著被點的卡片展開）-->
+  <div id="chart-panel" style="display:none">
   <div class="chart-section">
     <div id="chart-info" style="display:none" class="chart-info">
       <div class="ci-left" style="display:flex;align-items:center;gap:14px">
@@ -465,6 +476,7 @@ body {
     <div id="main-chart"></div>
     <div id="volume-chart"></div>
   </div>
+  </div><!-- /chart-panel -->
 
 </div>
 
@@ -559,7 +571,7 @@ body {
                     <div class="rc-badge ${type}-badge">${cnt} / ${maxCnt} 策略</div>
                 </div>`;
 
-            card.onclick = () => showChart(r.code, type);
+            card.onclick = () => showChart(r.code, type, card);
             return card;
         }
 
@@ -598,26 +610,43 @@ body {
                 longCards.appendChild(makeCard(r, 'long', (r.strategies||[]).join('+')||r.reason||'—')));
         }
 
-        // 自動選第一支空方第一策略的第一檔
+        // 自動選第一支空方第一策略的第一檔（不傳 card，panel 不展開）
         const firstShortStrat = Object.values(shortByStrat)[0] || shortFallback;
         const firstLongStrat  = Object.values(longByStrat)[0]  || longFallback;
         const first = (firstShortStrat[0]) || (firstLongStrat[0]);
-        if (first) showChart(first.code, firstShortStrat[0] ? 'short' : 'long');
+        if (first) showChart(first.code, firstShortStrat[0] ? 'short' : 'long', null);
     }
 
     // ── 顯示圖表
-    function showChart(code, type) {
+    function showChart(code, type, clickedCard) {
         currentCode = code;
         currentType = type;
-        const { short=[], long=[] } = dashboardData.daily_recommendations;
-        const item = [...short, ...long].find(r => r.code === code) || null;
+        const rec  = dashboardData.daily_recommendations;
+        const allStocks = [
+            ...Object.values(rec.short_by_strategy || {}).flat(),
+            ...Object.values(rec.long_by_strategy  || {}).flat(),
+            ...(rec.short || []),
+            ...(rec.long  || []),
+        ];
+        const item = allStocks.find(r => r.code === code) || null;
 
-        // 卡片高亮
+        // 卡片高亮（只高亮被點到的那張）
         document.querySelectorAll('.rec-card').forEach(c => c.classList.remove('sel'));
-        document.querySelectorAll(`.rec-card[data-code="${code}"]`).forEach(c => {
-            c.classList.add('sel');
-            c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        });
+        if (clickedCard) {
+            clickedCard.classList.add('sel');
+        } else {
+            document.querySelectorAll(`.rec-card[data-code="${code}"]`)[0]?.classList.add('sel');
+        }
+
+        // 把 chart-panel 插到被點擊卡片的正下方
+        const chartPanel = document.getElementById('chart-panel');
+        if (clickedCard) {
+            clickedCard.after(chartPanel);
+            chartPanel.style.display = 'block';
+            // 重設動畫
+            chartPanel.style.animation = 'none';
+            requestAnimationFrame(() => { chartPanel.style.animation = ''; });
+        }
 
         // chart info bar
         const infoEl = document.getElementById('chart-info');
