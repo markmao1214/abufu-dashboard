@@ -140,8 +140,8 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 9px;
-  padding: 11px 14px;
-  margin-bottom: 7px;
+  padding: 8px 14px;
+  margin-bottom: 6px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
@@ -150,30 +150,19 @@ body {
 .rec-card.sel.short-card { background: var(--short-bg); border-color: var(--short); }
 .rec-card.sel.long-card  { background: var(--long-bg);  border-color: var(--long);  }
 .rc-left  { flex: 1; min-width: 0; }
-.rc-name  { font-size: 17px; font-weight: 700; color: var(--text-bright); white-space: nowrap; }
+.rc-name  { font-size: 20px; font-weight: 700; color: var(--text-bright); white-space: nowrap; }
 .rc-strats {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-dim);
-  margin-top: 3px;
+  margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 220px;
+  max-width: 240px;
 }
 .rc-right { text-align: right; flex-shrink: 0; margin-left: 14px; }
-.rc-price { font-size: 20px; font-weight: 800; font-family: 'SF Mono','Menlo',monospace; color: var(--text-bright); }
-.rc-change { font-size: 13px; margin-top: 1px; }
-.rc-badge {
-  display: inline-block;
-  border-radius: 4px;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  margin-top: 5px;
-  letter-spacing: 0.5px;
-}
-.rc-badge.short-badge { background: rgba(0,217,122,0.12); color: var(--short); }
-.rc-badge.long-badge  { background: rgba(255,69,96,0.12);  color: var(--long);  }
+.rc-price  { font-size: 22px; font-weight: 800; font-family: 'SF Mono','Menlo',monospace; color: var(--text-bright); }
+.rc-change { font-size: 15px; margin-top: 1px; }
 
 /* ── Chart Panel（inline，跟著卡片展開）────────── */
 #chart-panel {
@@ -568,7 +557,6 @@ body {
                 <div class="rc-right">
                     <div class="rc-price">${r.price > 0 ? r.price : '—'}</div>
                     <div class="rc-change ${chgCls}">${chgStr}</div>
-                    <div class="rc-badge ${type}-badge">${cnt} / ${maxCnt} 策略</div>
                 </div>`;
 
             card.onclick = () => showChart(r.code, type, card);
