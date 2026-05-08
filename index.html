@@ -617,8 +617,19 @@ body {
         if (first) showChart(first.code, firstShortStrat[0] ? 'short' : 'long', null);
     }
 
-    // ── 顯示圖表
+    // ── 顯示圖表（再點同一張 → 收合）
     function showChart(code, type, clickedCard) {
+        const chartPanel = document.getElementById('chart-panel');
+
+        // 再點已選中的卡片 → 收合並取消選取
+        if (clickedCard && clickedCard.classList.contains('sel')) {
+            clickedCard.classList.remove('sel');
+            chartPanel.style.display = 'none';
+            currentCode = null;
+            currentType = null;
+            return;
+        }
+
         currentCode = code;
         currentType = type;
         const rec  = dashboardData.daily_recommendations;
@@ -639,7 +650,6 @@ body {
         }
 
         // 把 chart-panel 插到被點擊卡片的正下方
-        const chartPanel = document.getElementById('chart-panel');
         if (clickedCard) {
             clickedCard.after(chartPanel);
             chartPanel.style.display = 'block';
